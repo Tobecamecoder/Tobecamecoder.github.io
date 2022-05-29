@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="加油，未来可期！" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>hadoop |  王先生的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="王先生的博客" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-hadoop"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  hadoop
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/29/hadoop/" class="article-date">
+  <time datetime="2022-05-29T14:33:30.000Z" itemprop="datePublished">2022-05-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">13 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="大数据入门"><a href="#大数据入门" class="headerlink" title="大数据入门"></a>大数据入门</h1><h2 id="hadoop1-x和hadoop2-x的区别"><a href="#hadoop1-x和hadoop2-x的区别" class="headerlink" title="hadoop1.x和hadoop2.x的区别"></a>hadoop1.x和hadoop2.x的区别</h2><h3 id="hadoop1-x"><a href="#hadoop1-x" class="headerlink" title="hadoop1.x"></a>hadoop1.x</h3><ul>
+<li>MapReduce: 计算和资源调度</li>
+<li>HDFS：数据存储</li>
+<li>Common：辅助工具</li>
+</ul>
+<h3 id="hadoop2-x"><a href="#hadoop2-x" class="headerlink" title="hadoop2.x"></a>hadoop2.x</h3><ul>
+<li>MapRuduce:计算</li>
+<li>Yarn:资源调度</li>
+<li>HDFS：数据存储</li>
+<li>Common:辅助工具</li>
+</ul>
+<h2 id="HDFS架构："><a href="#HDFS架构：" class="headerlink" title="HDFS架构："></a>HDFS架构：</h2><ul>
+<li>NameNode: 存储文件的元数据，比如文件名，文件目录结构，文件属性(生成时间，副本数，文件权限)，以及每个文件的块列表和块所在的DataNode</li>
+<li>DataNode: 在本地文件系统存储文件块数据，以及块数据的校验和</li>
+<li>Secondary NameNode:来监控HDFS状态和辅助后台数据，每隔一段时间获取HDFS元数据的快照</li>
+</ul>
+<h2 id="YARN架构："><a href="#YARN架构：" class="headerlink" title="YARN架构："></a>YARN架构：</h2><ul>
+<li>ResuorceManager作用：<ul>
+<li>处理客户机请求</li>
+<li>监控NodeManager</li>
+<li>启动或监控ApplicationMaster</li>
+<li>资源的分配和调度</li>
+</ul>
+</li>
+<li>NodeManager<ul>
+<li>管理单个节点的资源</li>
+<li>处理来自ResourceManager的命令</li>
+<li>处理来自ApplicationMaster的命令</li>
+</ul>
+</li>
+<li>Applicationmastes<ul>
+<li>负责数据的切分</li>
+<li>为应用程序申请资源并分配给内部的任务</li>
+<li>任务的监控和容错</li>
+</ul>
+</li>
+<li>Container<ul>
+<li>是Yarn资源的抽象，如内存，cpu，磁盘网络等</li>
+</ul>
+</li>
+</ul>
+<h2 id="MapReduce架构"><a href="#MapReduce架构" class="headerlink" title="MapReduce架构"></a>MapReduce架构</h2><ul>
+<li>Map阶段并行处理输入数据</li>
+<li>Reduce阶段对Map结果进行汇总</li>
+</ul>
+<h2 id="完全分布式运行模式"><a href="#完全分布式运行模式" class="headerlink" title="完全分布式运行模式"></a>完全分布式运行模式</h2><ul>
+<li>分析<ul>
+<li>准备客户机(静态IP、关闭防火墙、主机名称)</li>
+<li>安装JDK</li>
+<li>配置环境变量</li>
+<li>安装Hadoop</li>
+<li>配置环境变量</li>
+<li>配置集群</li>
+<li>单点启动</li>
+<li>配置ssh</li>
+<li>群起并测试集群</li>
+</ul>
+</li>
+</ul>
+<h3 id="编写集群分发脚本"><a href="#编写集群分发脚本" class="headerlink" title="编写集群分发脚本"></a>编写集群分发脚本</h3><h4 id="1-scp（secure-copy）安全拷贝"><a href="#1-scp（secure-copy）安全拷贝" class="headerlink" title="1.	scp（secure copy）安全拷贝"></a>1.	scp（secure copy）安全拷贝</h4><p>​	（1）scp定义：</p>
+<p>​		scp可以实现服务器与服务器之间的数据拷贝。（from server1 to server2）</p>
+<p>​	（2）基本语法</p>
+<p>​		scp  -r      $pdir&#x2F;$fname        $user@hadoop$host:$pdir&#x2F;$fname</p>
+<p>​		命令  递归    要拷贝的文件路径&#x2F;名称   目的用户@主机:目的路径&#x2F;名称</p>
+<p>（3）案例实操</p>
+<p>​		（a）在hadoop101上，将hadoop101中&#x2F;opt&#x2F;module目录下的软件拷贝到hadoop102上。</p>
+<p>​					[atguigu@hadoop101 &#x2F;]$ scp -r &#x2F;opt&#x2F;module  root@hadoop102:&#x2F;opt&#x2F;module</p>
+<p>​			（b）在hadoop103上，将hadoop101服务器上的&#x2F;opt&#x2F;module目录下的软件拷贝到hadoop103上。</p>
+<p>[atguigu@hadoop103 opt]$sudo scp -r atguigu@hadoop101:&#x2F;opt&#x2F;module root@hadoop103:&#x2F;opt&#x2F;module</p>
+<p>（c）在hadoop103上操作将hadoop101中&#x2F;opt&#x2F;module目录下的软件拷贝到hadoop104上。</p>
+<p>[atguigu@hadoop103 opt]$ scp -r atguigu@hadoop101:&#x2F;opt&#x2F;module root@hadoop104:&#x2F;opt&#x2F;module</p>
+<p>注意：拷贝过来的&#x2F;opt&#x2F;module目录，别忘了在hadoop102、hadoop103、hadoop104上修改所有文件的，所有者和所有者组。sudo chown atguigu:atguigu -R &#x2F;opt&#x2F;module</p>
+<p>（d）将hadoop101中&#x2F;etc&#x2F;profile文件拷贝到hadoop102的&#x2F;etc&#x2F;profile上。</p>
+<p>[atguigu@hadoop101 ~]$ sudo scp &#x2F;etc&#x2F;profile root@hadoop102:&#x2F;etc&#x2F;profile</p>
+<p>（e）将hadoop101中&#x2F;etc&#x2F;profile文件拷贝到hadoop103的&#x2F;etc&#x2F;profile上。</p>
+<p>[atguigu@hadoop101 ~]$ sudo scp &#x2F;etc&#x2F;profile root@hadoop103:&#x2F;etc&#x2F;profile</p>
+<p>（f）将hadoop101中&#x2F;etc&#x2F;profile文件拷贝到hadoop104的&#x2F;etc&#x2F;profile上。</p>
+<p>[atguigu@hadoop101 ~]$ sudo scp &#x2F;etc&#x2F;profile root@hadoop104:&#x2F;etc&#x2F;profile</p>
+<p>注意：拷贝过来的配置文件别忘了source一下&#x2F;etc&#x2F;profile，。</p>
+<h4 id="2-rsync-远程同步工具"><a href="#2-rsync-远程同步工具" class="headerlink" title="2.	 rsync 远程同步工具"></a>2.	 rsync 远程同步工具</h4><p>rsync主要用于备份和镜像。具有速度快、避免复制相同内容和支持符号链接的优点。</p>
+<p>rsync和scp区别：用rsync做文件的复制要比scp的速度快，rsync只对差异文件做更新。scp是把所有文件都复制过去。</p>
+<p>​	（1）基本语法</p>
+<p>rsync   -rvl    $pdir&#x2F;$fname        $user@hadoop$host:$pdir&#x2F;$fname</p>
+<p>命令  选项参数  要拷贝的文件路径&#x2F;名称   目的用户@主机:目的路径&#x2F;名称</p>
+<p>​	 选项参数说明</p>
+<p>表2-2</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-r</td>
+<td>递归</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>显示复制过程</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>拷贝符号连接</td>
+</tr>
+</tbody></table>
+<p>（2）案例实操</p>
+<p>​		（a）把hadoop101机器上的&#x2F;opt&#x2F;software目录同步到hadoop102服务器的root用户下的&#x2F;opt&#x2F;目录</p>
+<p>[atguigu@hadoop101 opt]$ rsync -rvl &#x2F;opt&#x2F;software&#x2F; root@hadoop102:&#x2F;opt&#x2F;software</p>
+<h4 id="3-xsync集群分发脚本"><a href="#3-xsync集群分发脚本" class="headerlink" title="3.	xsync集群分发脚本"></a>3.	xsync集群分发脚本</h4><p>（1）需求：循环复制文件到所有节点的相同目录下</p>
+<p>​	（2）需求分析：</p>
+<p>（a）rsync命令原始拷贝：</p>
+<p>rsync  -rvl   &#x2F;opt&#x2F;module  	 root@hadoop103:&#x2F;opt&#x2F;</p>
+<p>​		（b）期望脚本：</p>
+<p>xsync要同步的文件名称</p>
+<p>​		（c）说明：在&#x2F;home&#x2F;atguigu&#x2F;bin这个目录下存放的脚本，atguigu用户可以在系统任何地方直接执行。</p>
+<p>（3）脚本实现</p>
+<p>（a）在&#x2F;home&#x2F;atguigu目录下创建bin目录，并在bin目录下xsync创建文件，文件内容如下：</p>
+<p>[atguigu@hadoop102 ~]$ mkdir bin</p>
+<p>[atguigu@hadoop102 ~]$ cd bin&#x2F;</p>
+<p>[atguigu@hadoop102 bin]$ touch xsync</p>
+<p>[atguigu@hadoop102 bin]$ vi xsync</p>
+<p>在该文件中编写如下代码</p>
+<p>#!&#x2F;bin&#x2F;bash</p>
+<p>#1 获取输入参数个数，如果没有参数，直接退出</p>
+<p>pcount&#x3D;$#</p>
+<p>if((pcount&#x3D;&#x3D;0)); then</p>
+<p>echo no args;</p>
+<p>exit;</p>
+<p>fi</p>
+<p>#2 获取文件名称</p>
+<p>p1&#x3D;$1</p>
+<p>fname&#x3D;<code>basename $p1</code></p>
+<p>echo fname&#x3D;$fname</p>
+<p>#3 获取上级目录到绝对路径</p>
+<p>pdir&#x3D;<code>cd -P $(dirname $p1); pwd</code></p>
+<p>echo pdir&#x3D;$pdir</p>
+<p>#4 获取当前用户名称</p>
+<p>user&#x3D;<code>whoami</code></p>
+<p>#5 循环</p>
+<p>for((host&#x3D;103; host&lt;105; host++)); do</p>
+<p>​    echo ——————- hadoop$host ————–</p>
+<p>​    rsync -rvl $pdir&#x2F;$fname $user@hadoop$host:$pdir</p>
+<p>done</p>
+<p>（b）修改脚本 xsync 具有执行权限</p>
+<p>[atguigu@hadoop102 bin]$ chmod 777 xsync</p>
+<p>（c）调用脚本形式：xsync 文件名称</p>
+<p>[atguigu@hadoop102 bin]$ xsync &#x2F;home&#x2F;atguigu&#x2F;bin</p>
+<p>注意：如果将xsync放到&#x2F;home&#x2F;atguigu&#x2F;bin目录下仍然不能实现全局使用，可以将xsync移动到&#x2F;usr&#x2F;local&#x2F;bin目录下。</p>
+<h3 id="集群配置"><a href="#集群配置" class="headerlink" title="集群配置"></a>集群配置</h3><h4 id="集群部署规划"><a href="#集群部署规划" class="headerlink" title="集群部署规划"></a>集群部署规划</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>node01</th>
+<th>node02</th>
+<th>node03</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HDFS</td>
+<td>NameNode、DataNode</td>
+<td>DataNode</td>
+<td>SecondaryNameNode、DataNode</td>
+</tr>
+<tr>
+<td>YARN</td>
+<td>Nodemanager</td>
+<td>ResourceManager、NodeManager</td>
+<td>Nodemanager</td>
+</tr>
+</tbody></table>
+<h3 id="配置集群"><a href="#配置集群" class="headerlink" title="配置集群"></a>配置集群</h3><h4 id="（1）核心配置文件"><a href="#（1）核心配置文件" class="headerlink" title="（1）核心配置文件"></a>（1）核心配置文件</h4><p>配置core-site.xml</p>
+<p>[atguigu@hadoop102 hadoop]$ vi core-site.xml</p>
+<p>在该文件中编写如下配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 指定HDFS中NameNode的地址 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.defaultFS<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">   <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://hadoop102:9000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 指定Hadoop运行时产生文件的存储目录 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tmp.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/module/hadoop-2.7.2/data/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="（2）HDFS配置文件"><a href="#（2）HDFS配置文件" class="headerlink" title="（2）HDFS配置文件"></a>（2）HDFS配置文件</h4><p>配置hadoop-env.sh</p>
+<p>[atguigu@hadoop102 hadoop]$ vi hadoop-env.sh</p>
+<p>export JAVA_HOME&#x3D;&#x2F;opt&#x2F;module&#x2F;jdk1.8.0_144</p>
+<p>配置hdfs-site.xml</p>
+<p>[atguigu@hadoop102 hadoop]$ vi hdfs-site.xml</p>
+<p>在该文件中编写如下配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 指定HDFS中NameNode的地址 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.defaultFS<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">   <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://hadoop102:9000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 指定Hadoop运行时产生文件的存储目录 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tmp.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/module/hadoop-2.7.2/data/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="（3）YARN配置文件"><a href="#（3）YARN配置文件" class="headerlink" title="（3）YARN配置文件"></a>（3）YARN配置文件</h4><p>配置yarn-env.sh</p>
+<p>[atguigu@hadoop102 hadoop]$ vi yarn-env.sh</p>
+<p>export JAVA_HOME&#x3D;&#x2F;opt&#x2F;module&#x2F;jdk1.8.0_144</p>
+<p>配置yarn-site.xml</p>
+<p>[atguigu@hadoop102 hadoop]$ vi yarn-site.xml</p>
+<p>在该文件中增加如下配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Reducer获取数据的方式 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.nodemanager.aux-services<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">value</span>&gt;</span>mapreduce_shuffle<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 指定YARN的ResourceManager的地址 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.resourcemanager.hostname<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">value</span>&gt;</span>hadoop103<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="（4）MapReduce配置文件"><a href="#（4）MapReduce配置文件" class="headerlink" title="（4）MapReduce配置文件"></a>（4）MapReduce配置文件</h4><p>配置mapred-env.sh</p>
+<p>[atguigu@hadoop102 hadoop]$ vi mapred-env.sh</p>
+<p>export JAVA_HOME&#x3D;&#x2F;opt&#x2F;module&#x2F;jdk1.8.0_144</p>
+<p>配置mapred-site.xml</p>
+<p>[atguigu@hadoop102 hadoop]$ cp mapred-site.xml.template mapred-site.xml</p>
+<p>[atguigu@hadoop102 hadoop]$ vi mapred-site.xml</p>
+<p>在该文件中增加如下配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 指定MR运行在Yarn上 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.framework.name<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">value</span>&gt;</span>yarn<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>3．在集群上分发配置好的Hadoop配置文件</p>
+<p>[atguigu@hadoop102 hadoop]$ xsync &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;</p>
+<p>4．查看文件分发情况</p>
+<p>[atguigu@hadoop103 hadoop]$ cat &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;etc&#x2F;hadoop&#x2F;core-site.xml</p>
+<h3 id="集群单点启动"><a href="#集群单点启动" class="headerlink" title="集群单点启动"></a>集群单点启动</h3><p>（1）如果集群是第一次启动，需要<em><strong>*格式化*</strong></em><em><strong>*NameNode*</strong></em></p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ hadoop namenode -format</p>
+<p>（2）在hadoop102上启动NameNode</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ hadoop-daemon.sh start namenode</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ jps</p>
+<p>3461 NameNode</p>
+<p>（3）在hadoop102、hadoop103以及hadoop104上分别启动DataNode</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ hadoop-daemon.sh start datanode</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ jps</p>
+<p>3461 NameNode</p>
+<p>3608 Jps</p>
+<p>3561 DataNode</p>
+<p>[atguigu@hadoop103 hadoop-2.7.2]$ hadoop-daemon.sh start datanode</p>
+<p>[atguigu@hadoop103 hadoop-2.7.2]$ jps</p>
+<p>3190 DataNode</p>
+<p>3279 Jps</p>
+<p>[atguigu@hadoop104 hadoop-2.7.2]$ hadoop-daemon.sh start datanode</p>
+<p>[atguigu@hadoop104 hadoop-2.7.2]$ jps</p>
+<p>3237 Jps</p>
+<p>3163 DataNode</p>
+<p>（4）思考：每次都一个一个节点启动，如果节点数增加到1000个怎么办？</p>
+<h3 id="SSH无密码登录配置"><a href="#SSH无密码登录配置" class="headerlink" title="SSH无密码登录配置"></a>SSH无密码登录配置</h3><h4 id="配置ssh"><a href="#配置ssh" class="headerlink" title="配置ssh"></a>配置ssh</h4><p>（1）基本语法</p>
+<p>ssh另一台电脑的ip地址</p>
+<p>（2）ssh连接时出现Host key verification failed的解决方法</p>
+<p>​	[atguigu@hadoop102 opt] $ ssh 192.168.1.103</p>
+<p>​	The authenticity of host ‘192.168.1.103 (192.168.1.103)’ can’t be established.</p>
+<p>​	RSA key fingerprint is cf:1e:de:d7:d0:4c:2d:98:60:b4:fd:ae:b1:2d:ad:06.</p>
+<p>​	Are you sure you want to continue connecting (yes&#x2F;no)? </p>
+<p>​	Host key verification failed.</p>
+<p>（3）解决方案如下：直接输入yes</p>
+<h4 id="设置"><a href="#设置" class="headerlink" title="设置"></a>设置</h4><p>（2）生成公钥和私钥：</p>
+<p>​	[atguigu@hadoop102 .ssh]$ ssh-keygen -t rsa</p>
+<p>​	然后敲（三个回车），就会生成两个文件id_rsa（私钥）、id_rsa.pub（公钥）</p>
+<p>（3）将公钥拷贝到要免密登录的目标机器上</p>
+<p>​	[atguigu@hadoop102 .ssh]$ ssh-copy-id hadoop102</p>
+<p>​	[atguigu@hadoop102 .ssh]$ ssh-copy-id hadoop103</p>
+<p>​	[atguigu@hadoop102 .ssh]$ ssh-copy-id hadoop104</p>
+<p>注意：</p>
+<p>还需要在hadoop102上采用root账号，配置一下无密登录到hadoop102、hadoop103、hadoop104；</p>
+<p>还需要在hadoop103上采用atguigu账号配置一下无密登录到hadoop102、hadoop103、hadoop104服务器上。</p>
+<h4 id="SSH文件夹下的文件功能解释"><a href="#SSH文件夹下的文件功能解释" class="headerlink" title="SSH文件夹下的文件功能解释"></a>SSH文件夹下的文件功能解释</h4><table>
+<thead>
+<tr>
+<th>known_hosts</th>
+<th>记录ssh访问过计算机的公钥(public key)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id_rsa</td>
+<td>生成的私钥</td>
+</tr>
+<tr>
+<td>id_rsa.pub</td>
+<td>生成的公钥</td>
+</tr>
+<tr>
+<td>authorized_keys</td>
+<td>存放授权过得无密登录服务器公钥</td>
+</tr>
+</tbody></table>
+<h4 id="群起集群"><a href="#群起集群" class="headerlink" title="群起集群"></a>群起集群</h4><h5 id="配置slaves"><a href="#配置slaves" class="headerlink" title="配置slaves"></a>配置slaves</h5><p>&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;etc&#x2F;hadoop&#x2F;slaves</p>
+<p>[atguigu@hadoop102 hadoop]$ vi slaves</p>
+<p>在该文件中增加如下内容：</p>
+<p>hadoop102</p>
+<p>hadoop103</p>
+<p>hadoop104</p>
+<p>注意：该文件中添加的内容结尾不允许有空格，文件中不允许有空行。</p>
+<p>同步所有节点配置文件</p>
+<p>[atguigu@hadoop102 hadoop]$ xsync slaves</p>
+<h5 id="启动集群"><a href="#启动集群" class="headerlink" title="启动集群"></a>启动集群</h5><p>（1）如果集群是第一次启动，需要格式化NameNode（注意格式化之前，一定要先停止上次启动的所有namenode和datanode进程，然后再删除data和log数据）</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ bin&#x2F;hdfs namenode -format</p>
+<p>（2）启动HDFS</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ sbin&#x2F;start-dfs.sh</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ jps</p>
+<p>4166 NameNode</p>
+<p>4482 Jps</p>
+<p>4263 DataNode</p>
+<p>[atguigu@hadoop103 hadoop-2.7.2]$ jps</p>
+<p>3218 DataNode</p>
+<p>3288 Jps</p>
+<p>[atguigu@hadoop104 hadoop-2.7.2]$ jps</p>
+<p>3221 DataNode</p>
+<p>3283 SecondaryNameNode</p>
+<p>3364 Jps</p>
+<p>（3）启动YARN</p>
+<p>[atguigu@hadoop103 hadoop-2.7.2]$ sbin&#x2F;start-yarn.sh</p>
+<p>注意：NameNode和ResourceManger如果不是同一台机器，不能在NameNode上启动 YARN，应该在ResouceManager所在的机器上启动YARN。</p>
+<p>（4）Web端查看SecondaryNameNode</p>
+<p>（a）浏览器中输入：<a target="_blank" rel="noopener" href="http://hadoop104:50090/status.html">http://hadoop104:50090/status.html</a></p>
+<p>​		（b）查看SecondaryNameNode信息，如图2-41所示。</p>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><ol>
+<li><p>防火墙没关闭、或者没有启动Yarn</p>
+<p><strong>INFO client.RMProxy: Connecting to ResourceManager at hadoop108&#x2F;192.168.10.108:8032</strong></p>
+</li>
+<li><p>主机名配置错误</p>
+</li>
+<li><p>IP地址配置错误</p>
+</li>
+<li><p>SSH没有配置好</p>
+</li>
+<li><p>root用户和其他用于其他集群不统一</p>
+</li>
+<li><p>配置文件修改不细心</p>
+</li>
+<li><p>未编译源码</p>
+<p><strong>Unable to load native-hadoop library for your platform… using builtin-java classes where applicable</strong></p>
+<p><strong>17&#x2F;05&#x2F;22 15:38:58 INFO client.RMProxy: Connecting to ResourceManager at hadoop108&#x2F;192.168.10.108:8032</strong></p>
+</li>
+<li><p>不识别主机名</p>
+<p>java.net.UnknownHostException: hadoop102: hadoop102</p>
+<p>​    at java.net.InetAddress.getLocalHost(InetAddress.java:1475)</p>
+<p>​    at org.apache.hadoop.mapreduce.JobSubmitter.submitJobInternal(JobSubmitter.java:146)</p>
+<p>​    at org.apache.hadoop.mapreduce.Job$10.run(Job.java:1290)</p>
+<p>​    at org.apache.hadoop.mapreduce.Job$10.run(Job.java:1287)</p>
+<p>​    at java.security.AccessController.doPrivileged(Native Method)</p>
+<p>at javax.security.auth.Subject.doAs(Subject.java:415)</p>
+<p><strong>解决方案</strong></p>
+<p>​	（1）在&#x2F;etc&#x2F;hosts文件中添加192.168.1.102 hadoop102</p>
+<p>​	（2）主机名称不要起hadoop  hadoop000等特殊名称</p>
+</li>
+<li><p>DataNode和NameNode进制同时只能工作一个</p>
+<p><img src="D:\大数据\media\DataNode和NameNode.PNG" alt="DataNode和NameNode"></p>
+</li>
+<li><p>执行命令不生效，黏贴word中命令时，遇到- 和-没区分开。导致命令失效</p>
+</li>
+<li><p>JPS发现进程已经没有，但是重新启动集群，提示进程以及开启。</p>
+<p>原因：在Linux的根目录下&#x2F;tmp目录中存在启动的进程临时文件，将集群相关的进程删除掉，在重新启动</p>
+</li>
+<li><p>JPS不生效</p>
+<p>原因：全局变量hadoop java没有生效。解决办法：需要source &#x2F;etc&#x2F;profile文件</p>
+</li>
+<li><p>8088端口链接不上</p>
+<p>[atguigu@hadoop102 桌面]$ cat &#x2F;etc&#x2F;hosts</p>
+<p>注释掉如下代码</p>
+<p>#127.0.0.1  localhost localhost.localdomain localhost4 localhost4.localdomain4</p>
+<p>#::1     hadoop102</p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2022/05/29/hadoop/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/29/hdfs/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            hdfs
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/05/29/mysql%E5%9F%BA%E7%A1%80/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">mysql基础</div>
+      </a>
+    
+  </nav>
+
+  
+   
+    
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021-2022
+        <i class="ri-heart-fill heart_icon"></i> WangQi
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/1.svg" alt="王先生的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+ 
+<script src="/js/clickLove.js"></script>
+ 
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

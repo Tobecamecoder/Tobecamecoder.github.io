@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="加油，未来可期！" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>mapreduce |  王先生的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="王先生的博客" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-mapreduce"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  mapreduce
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/29/mapreduce/" class="article-date">
+  <time datetime="2022-05-29T14:33:47.000Z" itemprop="datePublished">2022-05-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">4.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">16 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="MapReduce概述"><a href="#MapReduce概述" class="headerlink" title="MapReduce概述"></a>MapReduce概述</h1><h2 id="1-1MapReduce定义"><a href="#1-1MapReduce定义" class="headerlink" title="1.1MapReduce定义"></a>1.1MapReduce定义</h2><ul>
+<li><p>MR是一个<strong>分布式****运算</strong>程序的编程框架</p>
+</li>
+<li><p>MR是分析数据，HDFS是存储数据</p>
+</li>
+<li><p>MR的核心功能：</p>
+<ul>
+<li>将<strong>用户编写的业务逻辑代码</strong>和<strong>自带默认组件</strong>整合成一个完整的<strong>分布式运算程序</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="1-2MapReduce优缺点"><a href="#1-2MapReduce优缺点" class="headerlink" title="1.2MapReduce优缺点"></a>1.2MapReduce优缺点</h2><ul>
+<li><p>优点：</p>
+<ul>
+<li>MR易于编程：他简单实现一些接口，就可以完成一个分布式程序</li>
+<li>良好的拓展性：可以增加机器来拓展计算能力</li>
+<li>高容错性：其中一个机器挂掉，可以把上面的计算任务转移到另一个节点运行，不至于这个任务运行失败</li>
+<li>适合PB级以上海量数据的离线处理</li>
+</ul>
+</li>
+<li><p>缺点：</p>
+<ul>
+<li><p>不擅长实时计算：无法像MySQL一样，在毫秒或者秒级内返回结果</p>
+</li>
+<li><p>不擅长流式计算：流式计算输入数据式动态的，而MR的<strong>输入数据集是静态的</strong></p>
+</li>
+<li><p>不擅长DAG(有向图)计算：每个MR作业的输出结果都会写入到磁盘，会造成大量的磁盘IO，导致性能非常低下</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="1-3MapReduce核心思想"><a href="#1-3MapReduce核心思想" class="headerlink" title="1.3MapReduce核心思想"></a>1.3MapReduce核心思想</h2><p>核心思想如图</p>
+<p><img src="D:\大数据\media\MR核心思想.PNG" alt="MR核心思想"></p>
+<ul>
+<li><p>分布式运算程序往往分为<strong>至少2步</strong></p>
+</li>
+<li><p>第一个阶段的MapTask并发实例，完全独立，互补干扰</p>
+</li>
+<li><p>第二阶段的ReduceTask并发实例，互补干扰。但是他们依赖上一阶段的所有的MapTasK并发实例的输出</p>
+</li>
+<li><p>MR编程模型只能包含一个Map阶段和一个Reduce阶段，如果用户的业务逻辑非常复杂，那就只能多个MR程序，串行运行。就是一个Map阶段一个Reduce阶段，再来一个Map阶段一个Reduce阶段。。。</p>
+</li>
+</ul>
+<h2 id="1-4MapReduce进程"><a href="#1-4MapReduce进程" class="headerlink" title="1.4MapReduce进程"></a>1.4MapReduce进程</h2><ul>
+<li><p>一个完整的MapReduce程序分布式运行时有三类实例进程</p>
+<ul>
+<li><p><strong>MrAppMaste</strong>r:负责整个程序的过程调度和状态协调</p>
+</li>
+<li><p><strong>MapTask</strong>：负责Map阶段的整个数据处理流程</p>
+</li>
+<li><p><strong>ReduceTask</strong>:负责Reduce阶段的整个数据处理流程</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="1-5官方WordCount源码"><a href="#1-5官方WordCount源码" class="headerlink" title="1.5官方WordCount源码"></a>1.5官方WordCount源码</h2><p>​	采用反编译工具反编译源码，发现WordCount案例有Map类、Reduce类和驱动类。且数据的类型是Hadoop自身封装的序列化类型</p>
+<h2 id="1-6常用数据序列化类型"><a href="#1-6常用数据序列化类型" class="headerlink" title="1.6常用数据序列化类型"></a>1.6常用数据序列化类型</h2><p><strong>其实就是，Hadoop把Java的基本类型重新编译了一遍。生成了他们的包装类</strong></p>
+<table>
+<thead>
+<tr>
+<th>java类型</th>
+<th>Hadoop Writable类型(也就是Hadoop的包装类)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>boolean</td>
+<td>BooleanWritable</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>ByteWritable</td>
+</tr>
+<tr>
+<td>int</td>
+<td>IntWritable</td>
+</tr>
+<tr>
+<td>float</td>
+<td>FloatWritable</td>
+</tr>
+<tr>
+<td>long</td>
+<td>LongWritable</td>
+</tr>
+<tr>
+<td>double</td>
+<td>DoubleWritable</td>
+</tr>
+<tr>
+<td><strong>String</strong></td>
+<td><strong>Text</strong></td>
+</tr>
+<tr>
+<td>map</td>
+<td>MapWritable</td>
+</tr>
+<tr>
+<td>array</td>
+<td>ArrayWritable</td>
+</tr>
+</tbody></table>
+<h2 id="1-7MapReduce编程规范-重点"><a href="#1-7MapReduce编程规范-重点" class="headerlink" title="1.7MapReduce编程规范(重点)"></a>1.7MapReduce编程规范(重点)</h2><p>用户编程的程序分为三个部分：Mapper、Reducer和Driver</p>
+<ol>
+<li><p>Mapper</p>
+<ul>
+<li>用户自定义的Mapper类要继承Mapper</li>
+<li>Mapper的输入数据是KV的形式(KV的类型可以自定义)</li>
+<li>Mapper中的业务逻辑方法是map()</li>
+<li>Mapper的输出数据是KV形式（KV的类型可以自定义）</li>
+<li><strong style="color:red"><strong>map()方法(MapTask)对每一个&lt;K,V&gt;调用一次(每读取一行执行一次)</strong></strong></li>
+</ul>
+</li>
+<li><p>Reducer</p>
+<ul>
+<li>用户自定义的Reducer类要继承Reducer</li>
+<li>Reducer的输入数据类型是Mapper类的输出数据类型(KV类型一致)</li>
+<li>Reducer的业务逻辑方法是reduce()方法。</li>
+<li><strong style="color:red"><strong>ReduceTask进程对每一组相同的&lt;K,V&gt;组调用一次reduce()方法</strong></strong></li>
+</ul>
+</li>
+<li><p>Driver:相当于Yarn集群的客户端，用于提交我们整个程序的Yarn集群，提交的是封装的MapReduce程序相关运行参数的Job对象</p>
+<p><strong>流程：固定套路</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 创建job对象</span></span><br><span class="line">		<span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">		<span class="type">Job</span> <span class="variable">job</span> <span class="operator">=</span> Job.getInstance(conf);</span><br><span class="line">		<span class="comment">// 2.设置jar位置</span></span><br><span class="line">		job.setJarByClass(phoneCountDriver.class);</span><br><span class="line">		<span class="comment">// 3. 关联Mapper</span></span><br><span class="line">		job.setMapperClass(phoneCountMapper.class);</span><br><span class="line">		<span class="comment">// 4.关联Reducer</span></span><br><span class="line">		job.setReducerClass(phoneCountReducer.class);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 5. 设置输出类型</span></span><br><span class="line">		job.setMapOutputKeyClass(Text.class);</span><br><span class="line">		job.setMapOutputValueClass(FlowBean.class);</span><br><span class="line"></span><br><span class="line">		job.setOutputKeyClass(Text.class);</span><br><span class="line">		job.setOutputValueClass(FlowBean.class);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 6. 设置输入输出位置</span></span><br><span class="line">		FileInputFormat.setInputPaths(job, <span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;d:/phone_data.txt&quot;</span>));</span><br><span class="line">		FileOutputFormat.setOutputPath(job, <span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;d:/output1&quot;</span>));</span><br><span class="line">		<span class="comment">// 7.提交</span></span><br><span class="line">		job.waitForCompletion(<span class="literal">true</span>);</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="1-8WordCount案例实操（重点）"><a href="#1-8WordCount案例实操（重点）" class="headerlink" title="1.8WordCount案例实操（重点）"></a>1.8WordCount案例实操（重点）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;strong&gt;详情看尚硅谷大数据(MR篇)&lt;/strong&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Hadoop优化"><a href="#Hadoop优化" class="headerlink" title="Hadoop优化"></a>Hadoop优化</h1><h2 id="2-1序列化概念"><a href="#2-1序列化概念" class="headerlink" title="2.1序列化概念"></a>2.1序列化概念</h2><h3 id="什么是序列化？"><a href="#什么是序列化？" class="headerlink" title="什么是序列化？"></a>什么是序列化？</h3><p>​	序列化：就是把<strong>内存中的对象，转换成字节序列</strong>(或者其他数据传输协议)以便于存储到磁盘(持久化)和网络传输</p>
+<p>​	反序列化：就是收到字节序列(或其他数据传输协议)或者<strong>磁盘的持久化数据，转换成内存中的对象</strong></p>
+<h3 id="为什么要序列化？"><a href="#为什么要序列化？" class="headerlink" title="为什么要序列化？"></a>为什么要序列化？</h3><p>​	不序列化的对象，存于系统的内存中，如果关机之后，对象会消失。</p>
+<p>​	再者，内存中的对象只能再本地运行不能发送到网络中的其他计算机。这样序列化就解决了这些问题。</p>
+<h3 id="为啥不使用Java的序列化？"><a href="#为啥不使用Java的序列化？" class="headerlink" title="为啥不使用Java的序列化？"></a>为啥不使用Java的序列化？</h3><p>​	因为，Java的序列化是一个重量级序列化框架，会产生很多额外附带信息，所以不使用</p>
+<h3 id="hadoop序列化特点"><a href="#hadoop序列化特点" class="headerlink" title="hadoop序列化特点"></a>hadoop序列化特点</h3><ol>
+<li>紧凑：高效使用存储空间</li>
+<li>快速：读写数据的额外开销小</li>
+<li>可拓展：锁着通信协议的升级可升级</li>
+<li>互操作：支持多语言的交互</li>
+</ol>
+<h2 id="2-2自定义bean对象实现序列化接口-重点"><a href="#2-2自定义bean对象实现序列化接口-重点" class="headerlink" title="2.2自定义bean对象实现序列化接口(重点)"></a>2.2自定义bean对象实现序列化接口(重点)</h2><p>​	<strong>具体实现Bean对象序列化需要以下7个步骤</strong></p>
+<ul>
+<li>必须实现<strong>Writable接口</strong></li>
+<li>反序列化时，需要反射调用<strong>空参构造方法</strong>，所以必须有空参构造</li>
+<li>重写序列化方法：write()</li>
+<li>重写反序列化方法:readFields()</li>
+<li><strong>注意：反序列化的顺序和序列化的顺序完全一致</strong></li>
+<li>要把结果显示在文件中，需要<strong>重写toString()方法</strong>，<strong>可用”\t”隔开</strong>，以便后续使用。</li>
+<li>如果需要将自定义的bean放在key中传输，则还需要实现Comparable接口，因为MapReduce框中的Shuffle过程要求对key必须能排序。详见后面排序案例。</li>
+</ul>
+<h2 id="2-3序列化案例实操-重点"><a href="#2-3序列化案例实操-重点" class="headerlink" title="2.3序列化案例实操(重点)"></a>2.3序列化案例实操(重点)</h2><p><strong style="color:red">详细在课件资料：</strong></p>
+<p>注意：</p>
+<ul>
+<li>Mapper的输出KV格式，是Reducer的输入KV格式</li>
+<li></li>
+</ul>
+<h1 id="MapReduce框架原理（都很重要）"><a href="#MapReduce框架原理（都很重要）" class="headerlink" title="MapReduce框架原理（都很重要）"></a>MapReduce框架原理（都很重要）</h1><h2 id="3-1InputFormat数据输入"><a href="#3-1InputFormat数据输入" class="headerlink" title="3.1InputFormat数据输入"></a>3.1InputFormat数据输入</h2><h3 id="3-1-1切片于MapTask并行制度"><a href="#3-1-1切片于MapTask并行制度" class="headerlink" title="3.1.1切片于MapTask并行制度"></a>3.1.1切片于MapTask并行制度</h3><ol>
+<li><p>问题引出</p>
+<p>MapTask的并行度决定Map阶段的任务处理并发度，进而影响整个Job的处理速度。</p>
+<p>思考：1G的数据，启动8个MapTask，可以提高集群的并发处理能力。那么1K的数据，也启动8个MapTask，会提高集群性能吗？MapTask并行任务是否越多越好呢？哪些因素影响了MapTask并行度？</p>
+</li>
+<li><p>MapTask并行度决定机制</p>
+<ul>
+<li><strong style="color:red;font-size:18px">数据块：Block是HDFS的物理分区，把数据物理分成一块一块的</strong></li>
+<li><strong style="color:red;font-size:18px">切片:数据切片是逻辑分区，只是逻辑上分为一块，物理上仍按照数据块分</strong></li>
+</ul>
+</li>
+<li><p><strong>数据切片与MapTask并行度决定机制图</strong></p>
+<p><img src="D:\大数据\media\数据切片.PNG" alt="数据切片"></p>
+</li>
+<li><p>注意点：</p>
+<ol>
+<li>一个切片由一个MapTask执行</li>
+<li>一个Job的Map阶段并行度由客户端在提交Job的切片数量决定。</li>
+<li>切片的分割只是由文件决定，一个文件可以有N个切片，但是多个文件不可以共用一个切片。</li>
+</ol>
+</li>
+</ol>
+<h3 id="3-1-2Job提交流程源码和切片源码"><a href="#3-1-2Job提交流程源码和切片源码" class="headerlink" title="3.1.2Job提交流程源码和切片源码"></a>3.1.2Job提交流程源码和切片源码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">---------------------Job提交流程源码详解--------------------</span><br><span class="line">waitForCompletion();<span class="comment">//方法是入口</span></span><br><span class="line"></span><br><span class="line">submit(); <span class="comment">//第二个入口</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//1. 建立链接</span></span><br><span class="line">connect();</span><br><span class="line">	<span class="comment">//1.1 创建提交Job的代理</span></span><br><span class="line">	<span class="keyword">new</span> <span class="title class_">Cluster</span>(getConfiguration());</span><br><span class="line">		<span class="comment">//1.1.1 判断本地yarn 还是远程</span></span><br><span class="line">		initialize(JobTrackAddr,conf);</span><br><span class="line"></span><br><span class="line"><span class="comment">//2. 提交Job</span></span><br><span class="line">submitter.submitJobInternal(Job.<span class="built_in">this</span>,cluster)</span><br><span class="line">    <span class="comment">//1. 创建给集群提交数据的Stag路径</span></span><br><span class="line">    Path jobstagingArea </span><br><span class="line">    JobSubmissionFiles.getStagingDir(cluster,conf);</span><br><span class="line">	<span class="comment">//2. 获取Jobid 创建Job路径</span></span><br><span class="line">	<span class="type">JobId</span> <span class="variable">jobid</span> <span class="operator">=</span> submitClient.getNewJobID();</span><br><span class="line">	<span class="comment">//3. 拷贝Jar包到集群</span></span><br><span class="line">	copyAndConfigureFiles(job,submitJobDir);</span><br><span class="line">	rUpLoader.uploadFiles(job,jobSumbitDir);</span><br><span class="line">	<span class="comment">//4. 计算切片，生成切片规划文件</span></span><br><span class="line">	writeSplits(job,submitJobDir);</span><br><span class="line">	maps=writerNewSplit(Job,jobsubmitJobDir);</span><br><span class="line">	input.getSplits(job);</span><br><span class="line">	<span class="comment">//5. 向Stag路径写XML配置文件</span></span><br><span class="line">	writeConf(conf,submitJobFile);</span><br><span class="line">	conf.writeXML(out);</span><br><span class="line">	<span class="comment">//6. 提交Job返回提交状态</span></span><br><span class="line">	status = submitClient.submitJob(JobID,submitJobDir.toString(),job.getCredentials);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-1-2FileInputFormat切片源码解析-input-getSplits-job"><a href="#3-1-2FileInputFormat切片源码解析-input-getSplits-job" class="headerlink" title="3.1.2FileInputFormat切片源码解析(input.getSplits(job))"></a>3.1.2FileInputFormat切片源码解析(input.getSplits(job))</h3><ul>
+<li><p>程序先找到数据存储的目录</p>
+</li>
+<li><p>开始遍历处理（规划切片）目录下的每一个文件</p>
+</li>
+<li><p>遍历第一个文件ss.txt</p>
+<ul>
+<li><p>获取文件大小fs.sizeOf(ss.txt);</p>
+</li>
+<li><p>计算切片大小</p>
+<p>computerSplitSize(Math.max(minSize,Math.min(maxSize,blocksize)))&#x3D;blocksize&#x3D;128M; 如果是本地是32M</p>
+<p>minSize:1k</p>
+<p>maxSize:32M</p>
+</li>
+<li><p>默认情况下，切片的大小是blocksize</p>
+</li>
+<li><p>开始切，</p>
+<ul>
+<li>形成第一个切片：ss.txt:0-128M</li>
+<li>第二个切片：ss.txt:128M-256M</li>
+<li>第三个切片：ss.txt:256M-300M</li>
+</ul>
+<p><strong>每次切片时，都要判断剩余的部分是否大于块的1.1倍数，不大于1.1倍就划分为1个切片</strong></p>
+</li>
+<li><p>将切片信息写到一个切片规划文件中</p>
+</li>
+<li><p>整个切片的核心过程在getSplit()方法中完成</p>
+</li>
+<li><p>InputSplit只记录了切片的元数据信息，比如起始位置，长度等</p>
+</li>
+</ul>
+</li>
+<li><p>提交切片规划到YARN上，YARN的MrAppMaster就可以根据规划文件计算开启的MapTask个数</p>
+</li>
+</ul>
+<h3 id="3-1-3FileInputFormat切片机制"><a href="#3-1-3FileInputFormat切片机制" class="headerlink" title="3.1.3FileInputFormat切片机制"></a>3.1.3FileInputFormat切片机制</h3><ol>
+<li><p>切片机制：</p>
+<ol>
+<li>简单地按照文件内容长度切片</li>
+<li>切片的大小，默认为blocksize大小</li>
+<li><strong>切片时不考虑数据集整体，而是逐个对每一个文件单独切片</strong></li>
+</ol>
+</li>
+<li><p>案例分析：</p>
+<ol>
+<li><p>输入数据有两个文件：</p>
+<p>file1.txt   320M</p>
+<p>file2.txt   10M</p>
+</li>
+<li><p>经过FileInputFormat切片机制运算后，生成切片信息如下：</p>
+<p>file1.txt.split1 –&gt; 0~128M</p>
+<p>file1.txt.split2—&gt;128~256M</p>
+<p>file1.txt.split3—&gt;256~300M</p>
+<p>file2.txt.split1 —&gt; 0-10M</p>
+</li>
+</ol>
+</li>
+<li><p>注意点:</p>
+<ol>
+<li><p>源码中计算机切片大小的公式：</p>
+<p>Math.max(minSize,Math.min(maxSize,blockSize));</p>
+<p>minSize&#x3D;1 默认值为1</p>
+<p>maxSize&#x3D;Long.MAXVlue</p>
+<p>因此，默认情况下，切片大小&#x3D;blocksize </p>
+<p><strong>注意：本地是32M，集群时128M或256M</strong></p>
+</li>
+<li><p>切片大小设置：</p>
+<ul>
+<li><p>maxsize(切片最大值)</p>
+<p>参数如果比blockSize小，会让切片变小，就是等于整个参数的值。</p>
+</li>
+<li><p>minsize(切片最小值)</p>
+<p>参数如果比blockSize大，就可以让切片比blockSize更大。</p>
+</li>
+</ul>
+</li>
+<li><p>获取切片信息API</p>
+<p>&#x2F;&#x2F;获取切片的文件名称</p>
+<p>String name&#x3D;inputSplit.getPath().getName();</p>
+<p>&#x2F;&#x2F;根据文件类型获取切片信息</p>
+<p>FileSplit inputSplit&#x3D;(FileSplit)context.getInputSplit();</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="3-1-4CombineTextInputFormat切片机制"><a href="#3-1-4CombineTextInputFormat切片机制" class="headerlink" title="3.1.4CombineTextInputFormat切片机制"></a>3.1.4CombineTextInputFormat切片机制</h3><ol>
+<li><p>背景：</p>
+<p>框架默认的TextInputFormat切片机制是对任务按文件规划切片，<strong>不管文件多小，都会是一个单独的切片</strong>，都会交给一个MapTask，这样如果有大量小文件，就会<strong>产生大量的MapTask</strong>,处理效率低下。</p>
+</li>
+<li><p>应用场景</p>
+<p>用于小文件过多的场景。它可以将多个小文件从逻辑上规划到一个切片中，这样，多个小文件就可以交给一个MapTask处理。</p>
+</li>
+<li><p>虚拟存储切片的最大值设置</p>
+<p>CombineTextInputFormat.setMaxInputSplitSize(job, 4194304);&#x2F;&#x2F; 4m</p>
+<p>注意：虚拟存储切片最大值设置最好根据实际的小文件大小情况来设置具体的值。</p>
+</li>
+<li><p>切片生成过程</p>
+<img src="D:\大数据\media\ConmbineText.png" alt="ConmbineText" style="zoom:150%;" />
+
+<ul>
+<li><p>虚拟存储过程：</p>
+<p>将输入目录下所有文件大小，依次和设置的setMaxInputSplitSize值比较，如果不大于设置的最大值，逻辑上划分一个块。<strong>如果输入文件大于设置的最大值且大于两倍，那么以最大值切割一块；当剩余数据大小超过设置的最大值且不大于最大值2倍，此时将文件均分成2个虚拟存储块（防止出现太小切片）。</strong></p>
+<p>例如setMaxInputSplitSize值为4M，输入文件大小为8.02M，则先逻辑上分成一个4M。剩余的大小为4.02M，如果按照4M逻辑划分，就会出现0.02M的小的虚拟存储文件，所以将剩余的4.02M文件切分成（2.01M和2.01M）两个文件。</p>
+</li>
+<li><p>切片过程</p>
+<p>（a）判断虚拟存储的文件大小是否大于setMaxInputSplitSize值，大于等于则单独形成一个切片。</p>
+<p>（b）如果不大于则跟下一个虚拟存储文件进行合并，共同形成一个切片。</p>
+<p>（c）测试举例：有4个小文件大小分别为1.7M、5.1M、3.4M以及6.8M这四个小文件，则虚拟存储之后形成6个文件块，大小分别为：</p>
+<p>1.7M，（2.55M、2.55M），3.4M以及（3.4M、3.4M）</p>
+<p>最终会形成3个切片，大小分别为：</p>
+<p>（1.7+2.55）M，（2.55+3.4）M，（3.4+3.4）M</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-1-5CombineTextInputFormat案例"><a href="#3-1-5CombineTextInputFormat案例" class="headerlink" title="3.1.5CombineTextInputFormat案例"></a>3.1.5CombineTextInputFormat案例</h3><p><strong>查看课件</strong></p>
+<p>关键：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//在驱动类中添加代码如下:Driver类中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//如果不设置InputFormat，它默认用的是TextInputFormat.class</span></span><br><span class="line">job.setInputFormatClass(CombineTextInputFormat.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">//虚拟存储切片最大设置4M,可以调</span></span><br><span class="line">CombineTextInputFormat.setMaxInputSplitSize(job,<span class="number">4194304</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-1-6FileInputFormat实现类"><a href="#3-1-6FileInputFormat实现类" class="headerlink" title="3.1.6FileInputFormat实现类"></a>3.1.6FileInputFormat实现类</h3><p>思考：<strong>在运行MR程序时，输入的文件格式包括：基于行的日志文件，二进制格式文件，数据库表等。</strong>那么针对不同的数据类型，MR是如何读取数据的那？</p>
+<p>​	FileInputFormat常见的接口实现类包括:TextInputFormat，KeyValueTextInputFormat,NLineInputFormat,CombineTextInputFormat和自定义的InputFormat等。</p>
+<ol>
+<li><p>TextInputFormat：默认：</p>
+<p>按行读取每条记录。<strong>键时存储改行在整个文件中的起始字节偏移量，LongWritable类型。值是这行的内容，不包括任何行终止符(回车和换行符)，Text类型</strong></p>
+</li>
+<li><p>KeyValueTextInputFormat：</p>
+<p>每一行均为一条记录，被分隔符分割为Key,Value。可以通过在驱动类中设置<strong>con.set(KeyValueLineReconrdReader.KEY_VALUE_SEPERATOR,”\t”)</strong>,来设定分隔符。默认分隔符是tab(“\t”)</p>
+</li>
+<li><p>NLineInputFormat</p>
+<p>如果使用NLineInputFormat，代表每个<strong>map进程处理的InputSplit不在按Block块去划分</strong>。而是按<strong>NLineInputFormat指定的行数N来划分</strong>。即</p>
+<p><strong>输入文件的总行数&#x2F;N&#x3D;切片数。如果不整除，切片数&#x3D;商+1</strong></p>
+</li>
+</ol>
+<h3 id="3-1-7keyValueTextInputFormat使用案例"><a href="#3-1-7keyValueTextInputFormat使用案例" class="headerlink" title="3.1.7keyValueTextInputFormat使用案例"></a>3.1.7keyValueTextInputFormat使用案例</h3><ol>
+<li><p>需求</p>
+<p>统计输入文件中每一行的第一个单词相同的行数</p>
+</li>
+<li><p>输入数据</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+</li>
+<li><p>注意：在Driver类中</p>
+<p>&#x2F;&#x2F;1.设置切割符，因为默认是”\t”</p>
+<p>conf.set(KeyValueLineRecordReader.KEY_VALUE_SEPERATOR, “ “);</p>
+<p>&#x2F;&#x2F;2. 设置输出格式</p>
+<p>job.setInputFormatClass(KeyValueTextInputFormat.class);</p>
+</li>
+</ol>
+<h3 id="3-1-8NLineInputFormat使用案例"><a href="#3-1-8NLineInputFormat使用案例" class="headerlink" title="3.1.8NLineInputFormat使用案例"></a>3.1.8NLineInputFormat使用案例</h3><ol>
+<li><p>需求；</p>
+<p>对每个单词进行个数统计，要求根据每个输入文件的行数规定输出多少个切片。此案例是将每三行放入1一个切片中。</p>
+</li>
+<li><p>输入数据</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+<p>banzhang ni hao</p>
+<p>xihuan hadoop banzhang banzhang ni hao</p>
+<p>xihuan hadoop banzhang</p>
+</li>
+<li><p>期望输出</p>
+<p>Number of splits:4</p>
+</li>
+<li></li>
+</ol>
+<h2 id="3-2MapReduce工作流程"><a href="#3-2MapReduce工作流程" class="headerlink" title="3.2MapReduce工作流程"></a>3.2MapReduce工作流程</h2><img src="D:\大数据\media\MR工作流程1.PNG" alt="MR工作流程1" style="zoom: 200%;" />
+
+<img src="D:\大数据\media\MR工作流程2.PNG" alt="MR工作流程2" style="zoom:200%;" />
+
+<p><strong>流程解读</strong></p>
+<p>上面的流程是整个MR最全的工作流程。但是<strong>Shuffle过程是从第7步开始到16步</strong>结束。</p>
+<ol>
+<li>MapTask收集我们的map方法输出的KV对，放到内存缓冲区中。</li>
+<li>从内存缓冲区不断溢出本地磁盘文件，可能会溢出多个文件:<ol>
+<li>环形缓冲区，左边放索引信息，右边放元数据</li>
+<li>如果环形缓冲区的使用到80%，会将其溢出到本地磁盘.</li>
+<li>然后再从这端循环反向输入到另外一端。</li>
+</ol>
+</li>
+<li>多个溢出文件会被合并成大的溢出文件。</li>
+<li>在溢出过程及合并的过程中，都要<strong>调用Partitioner进行分区和针对Key</strong>进行排序。</li>
+<li>ReduceTask根据自己的分区号，去各个MapTask机器上取相应结果的分区数据。</li>
+<li>ReduceTask会取到同一个分区的来自不同的MapTask的结果文件，ReduceTask会将这些文件再进行合并(归并排序)</li>
+<li>合并成大文件之后，Shuffle的过程也结束了。后面进入ReduceTask的逻辑运算过程。<strong>从文件中取出一个一个的键值对Group，调用用户自定义的reduce()方法</strong></li>
+</ol>
+<p><strong>注意</strong></p>
+<p>​	Shuffle中的缓冲区大小会影响到MapReduce程序的执行效率，原则上说，缓冲区越大，磁盘IO的次数越少，执行速度就越快</p>
+<p>​	<strong>缓冲区的大小可以通过参数调整，参数：io.sort.mb默认100M</strong></p>
+<h2 id="3-3Shuffle机制"><a href="#3-3Shuffle机制" class="headerlink" title="3.3Shuffle机制"></a>3.3Shuffle机制</h2><h3 id="3-3-1Shuffle机制"><a href="#3-3-1Shuffle机制" class="headerlink" title="3.3.1Shuffle机制"></a>3.3.1Shuffle机制</h3><p>​	位于Map阶段之后，Reduce阶段之前的数据处理过程称为Shuffle。</p>
+<img src="D:\大数据\media\shuffle.png" alt="shuffle" style="zoom:200%;" />
+
+<h3 id="3-3-2Partition分区"><a href="#3-3-2Partition分区" class="headerlink" title="3.3.2Partition分区"></a>3.3.2Partition分区</h3><ol>
+<li><p>问题引入：</p>
+<p>要求将统计结果<strong>按照条件输出到不同的分区中（分区）</strong>。</p>
+<p>例如：将统计结果按照手机号不同身份分区。</p>
+</li>
+<li><p><strong>默认Partition分区</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HashPartitioner</span>&lt;K,V&gt; <span class="keyword">extends</span> <span class="title class_">Partitioner</span>&lt;k,v&gt;&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getPartition</span><span class="params">(K key,V value,<span class="type">int</span> numReduceTasks)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (Key.hashCode() &amp; Integer.MAX_VALUE) % numReduceTasks);</span><br><span class="line">        <span class="comment">//Key.hashCode() &amp; Integer.MAX_VALUE：</span></span><br><span class="line">        <span class="comment">//为了对Key.hashCode()瘦身，把前面的多余的值去掉</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-------注意：----------------</span><br><span class="line">   <span class="number">1.</span> 默认分区是根据：</span><br><span class="line">    	key的hashCode对ReduceTasks个数取模得到的。</span><br><span class="line">    	用户无法控制哪儿个key存储到哪儿个分区</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>自定义分区的步骤</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">//1. 自定义类继承Partitioner，重写getPartition()方法</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CustomPartition</span> <span class="keyword">extends</span> <span class="title class_">Partitioner</span>&lt;Text,FlowBean&gt;&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getPartition</span><span class="params">(Text key,FlowBean value,<span class="type">int</span> numPartitions)</span>&#123;</span><br><span class="line">        <span class="comment">//控制分区代码逻辑</span></span><br><span class="line">        <span class="keyword">return</span> partition;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//2. 在Job驱动中，设置自定义Partition</span></span><br><span class="line">job.setPartitionerClass(CustomPartitioner.class);</span><br><span class="line"><span class="comment">//3. 自定义Partition后，要根据自定义Partitioner的逻辑设置相应数量的ReduceTask</span></span><br><span class="line">job.setNumReduceTask(<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>分区总结</p>
+<p>假设：自定义分区数是5，则</p>
+<ul>
+<li>job.setNumReduceTask(1); 会正常运行，只不过会产生一个输出文件</li>
+<li>job.setNumReduceTask(2); 报错，输出IOException异常</li>
+<li>job.setNumReduceTask(6); 会出现5个分区，第六个为空，产生空文件</li>
+</ul>
+</li>
+</ol>
+<h2 id="3-4MapTask工作机制"><a href="#3-4MapTask工作机制" class="headerlink" title="3.4MapTask工作机制"></a>3.4MapTask工作机制</h2><h2 id="3-5ReduceTask工作机制"><a href="#3-5ReduceTask工作机制" class="headerlink" title="3.5ReduceTask工作机制"></a>3.5ReduceTask工作机制</h2><h2 id="3-6OutputFormat数据输出"><a href="#3-6OutputFormat数据输出" class="headerlink" title="3.6OutputFormat数据输出"></a>3.6OutputFormat数据输出</h2><h2 id="3-7Join多种应用"><a href="#3-7Join多种应用" class="headerlink" title="3.7Join多种应用"></a>3.7Join多种应用</h2><h2 id="3-8计数器应用"><a href="#3-8计数器应用" class="headerlink" title="3.8计数器应用"></a>3.8计数器应用</h2><h2 id="3-9数据清洗-ETL"><a href="#3-9数据清洗-ETL" class="headerlink" title="3.9数据清洗(ETL)"></a>3.9数据清洗(ETL)</h2><h2 id="3-10MapReduce开发总结"><a href="#3-10MapReduce开发总结" class="headerlink" title="3.10MapReduce开发总结"></a>3.10MapReduce开发总结</h2><h1 id="Hadoop数据压缩-开发重要"><a href="#Hadoop数据压缩-开发重要" class="headerlink" title="Hadoop数据压缩(开发重要)"></a>Hadoop数据压缩(开发重要)</h1><h2 id="4-1概述"><a href="#4-1概述" class="headerlink" title="4.1概述"></a>4.1概述</h2><h2 id="4-2MR支持的压缩编码"><a href="#4-2MR支持的压缩编码" class="headerlink" title="4.2MR支持的压缩编码"></a>4.2MR支持的压缩编码</h2><h2 id="4-3压缩方式选择"><a href="#4-3压缩方式选择" class="headerlink" title="4.3压缩方式选择"></a>4.3压缩方式选择</h2><h2 id="4-4压缩位置选择"><a href="#4-4压缩位置选择" class="headerlink" title="4.4压缩位置选择"></a>4.4压缩位置选择</h2><h2 id="4-5压缩参数配置"><a href="#4-5压缩参数配置" class="headerlink" title="4.5压缩参数配置"></a>4.5压缩参数配置</h2><h2 id="4-6压缩实操案例"><a href="#4-6压缩实操案例" class="headerlink" title="4.6压缩实操案例"></a>4.6压缩实操案例</h2><h1 id="Yarn资源调度器-面试重点"><a href="#Yarn资源调度器-面试重点" class="headerlink" title="Yarn资源调度器(面试重点)"></a>Yarn资源调度器(面试重点)</h1><h2 id="5-1Yarn基本架构"><a href="#5-1Yarn基本架构" class="headerlink" title="5.1Yarn基本架构"></a>5.1Yarn基本架构</h2><h2 id="5-2Yarn工作机制"><a href="#5-2Yarn工作机制" class="headerlink" title="5.2Yarn工作机制"></a>5.2Yarn工作机制</h2><h2 id="5-3作业提交全过程"><a href="#5-3作业提交全过程" class="headerlink" title="5.3作业提交全过程"></a>5.3作业提交全过程</h2><h2 id="5-4资源调度器"><a href="#5-4资源调度器" class="headerlink" title="5.4资源调度器"></a>5.4资源调度器</h2><h2 id="5-5任务的准则执行"><a href="#5-5任务的准则执行" class="headerlink" title="5.5任务的准则执行"></a>5.5任务的准则执行</h2><h1 id="Hadoop企业优化-开发重点"><a href="#Hadoop企业优化-开发重点" class="headerlink" title="Hadoop企业优化(开发重点)"></a>Hadoop企业优化(开发重点)</h1><h2 id="6-1MR跑的慢的原因"><a href="#6-1MR跑的慢的原因" class="headerlink" title="6.1MR跑的慢的原因"></a>6.1MR跑的慢的原因</h2><h2 id="6-2MR优化方法"><a href="#6-2MR优化方法" class="headerlink" title="6.2MR优化方法"></a>6.2MR优化方法</h2><h2 id="6-3HDFS小文件优化方法"><a href="#6-3HDFS小文件优化方法" class="headerlink" title="6.3HDFS小文件优化方法"></a>6.3HDFS小文件优化方法</h2><h1 id="MapReduce扩展案例"><a href="#MapReduce扩展案例" class="headerlink" title="MapReduce扩展案例"></a>MapReduce扩展案例</h1><h2 id="7-1倒排索引案例（多Job串联）"><a href="#7-1倒排索引案例（多Job串联）" class="headerlink" title="7.1倒排索引案例（多Job串联）"></a>7.1倒排索引案例（多Job串联）</h2><h2 id="7-2TopN案例"><a href="#7-2TopN案例" class="headerlink" title="7.2TopN案例"></a>7.2TopN案例</h2><h2 id="7-3栈博客共同好友案例"><a href="#7-3栈博客共同好友案例" class="headerlink" title="7.3栈博客共同好友案例"></a>7.3栈博客共同好友案例</h2><h1 id="常见问题和解决"><a href="#常见问题和解决" class="headerlink" title="常见问题和解决"></a>常见问题和解决</h1> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2022/05/29/mapreduce/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2022/05/29/hdfs/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">hdfs</div>
+      </a>
+    
+  </nav>
+
+  
+   
+    
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021-2022
+        <i class="ri-heart-fill heart_icon"></i> WangQi
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/1.svg" alt="王先生的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+ 
+<script src="/js/clickLove.js"></script>
+ 
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

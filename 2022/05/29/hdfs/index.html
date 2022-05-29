@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="加油，未来可期！" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>hdfs |  王先生的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="王先生的博客" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-hdfs"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  hdfs
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2022/05/29/hdfs/" class="article-date">
+  <time datetime="2022-05-29T14:33:38.000Z" itemprop="datePublished">2022-05-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">37 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="HDFS篇"><a href="#HDFS篇" class="headerlink" title="HDFS篇"></a>HDFS篇</h1><h1 id="HDFS概述"><a href="#HDFS概述" class="headerlink" title="HDFS概述"></a>HDFS概述</h1><ul>
+<li><p>HDFS（Hadoop Distribute FILE System）：是一个文件管理系统，然后是分布式</p>
+</li>
+<li><p>使用场景：适合<strong>一次写入，多次读出</strong>的场景，且支持文件的修改</p>
+<ul>
+<li>适合数据分析</li>
+<li>不适合用作网盘(网盘增删改查多)</li>
+</ul>
+</li>
+<li><p>优缺点：</p>
+<ul>
+<li>优点:<ul>
+<li>高容错型：<ul>
+<li>可以设置副本数</li>
+<li>当一个副本丢失后，它可以自动恢复</li>
+</ul>
+</li>
+<li>适合处理大数据<ul>
+<li>数据规模：处理规模达到GB、TB甚至PB级别</li>
+<li>文件规模：能够处理百万规模以上的文件数量</li>
+</ul>
+</li>
+<li>可构建在廉价机器上，通过多副本机制，提高可靠性</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>不适合低延时数据访问，比如毫秒级的存储数据，是做不到的</li>
+<li>无法高效的对<strong>大量小文件</strong>进存储<ul>
+<li>存储<strong>大量小文</strong>件的话，他会占用NameNode大量的内存来存储文件和快信息。这样不可取，因为NameNode的内存总是有限的</li>
+<li>小文件存储的寻址时间会超过读取时间，他违反了HDFS的设计目标</li>
+</ul>
+</li>
+<li>不支持并发写入，文件随机修改<ul>
+<li>一个文件只能有一个写，不允许多个线程同时写</li>
+<li>仅支持数据<strong>append（追加）</strong>，不支持文件的随机修改</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>HDFS的文件块大小（<strong>面试重点</strong>）</p>
+<ul>
+<li>默认大小：<ul>
+<li>Hadoop2.x是128M</li>
+<li>Hadoop1.x是64M</li>
+</ul>
+</li>
+<li>寻址时间为<strong>传输时间的1%</strong> ,为最佳时间</li>
+<li>如果硬盘的传输速率是100M&#x2F;S，那么最佳的是大小是100M(一般写128M)<ul>
+<li>如果传输速率高，可以是256M</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>为什么块的大小不能设置太小，也不能设置太大？</p>
+<ul>
+<li>HDFS的<strong>块设置太小，会增加寻址时间</strong></li>
+<li>块设置太大，从<strong>磁盘传输数据</strong>的时间会明显大于定位这个块开<strong>始位置所需时间</strong></li>
+<li>总结：<ul>
+<li>HDFS的块大小设置取决于磁盘传输速率</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="HDFS的Shell操作-重点"><a href="#HDFS的Shell操作-重点" class="headerlink" title="HDFS的Shell操作(重点)"></a>HDFS的Shell操作(重点)</h1><h2 id="基本语法："><a href="#基本语法：" class="headerlink" title="基本语法："></a>基本语法：</h2><ul>
+<li>bin&#x2F;hadoop fs 具体命令 —-&gt; 配置了环境变量可以 hadoop fs 具体命令</li>
+<li>bin&#x2F;hdfs dfs 具体命令</li>
+<li>注意：dfs 是fs 实现类，所以直接使用hadoop fs即可</li>
+</ul>
+<h2 id="常见命令"><a href="#常见命令" class="headerlink" title="常见命令"></a>常见命令</h2><ul>
+<li><p>启动Hadoop集群</p>
+<p>sbin&#x2F;start-dfs.sh   —&gt; 这个要在NameNode节点主机启动</p>
+<p>sbin&#x2F;start-yarn-sh  —-&gt; 这个要在ResourceManager节点主机启动</p>
+</li>
+<li><p>-help ：输出这个命令的参数</p>
+<p>hadoop fs -help ls  &#x2F;&#x2F; hadoop fs -help 跟需要了解的指令</p>
+</li>
+<li><p>-ls:   显示目录信息</p>
+<p>hadoop fs -ls -hl &#x2F;user&#x2F;</p>
+</li>
+<li><p>-mkdir: 创建一个文件夹</p>
+<p>hadoop fs -mkdir &#x2F;user&#x2F;tom</p>
+<p><strong>递归创建文件夹：hadoop fs -mkdir -p &#x2F;user&#x2F;digui1&#x2F;digui2&#x2F;digui3</strong></p>
+</li>
+<li><p>-moveFromLocal: 从本地移动到云端(<strong>本地删除</strong>)</p>
+<p>hadoop fs -moverFromLocal 源文件所在(指本地)  目标文件所在(指云端)</p>
+</li>
+<li><p>-copyFromLocal: 从本地拷贝到云端(<strong>本地不删除，等于复制</strong>)</p>
+<p>hadoop fs -copyFromLocal 源文件所在(指本地)   目标文件所在(指云端)</p>
+</li>
+<li><p>-appendToFile :  追加一个文件到引进存在的文件末尾</p>
+<p>hadoop fs -appendToFile 需要追加.txt  &#x2F;user&#x2F;tom&#x2F;被追加的文件.txt</p>
+</li>
+<li><p>-cat : 显示文件内容</p>
+<p>hadoop fs -cat &#x2F;user&#x2F;tom&#x2F;txixh.txt</p>
+</li>
+<li><p>-chgrp、-chown、-chmod: 与Linux的用法一致</p>
+</li>
+<li><p>-copyToLocal: 从云端拷贝至本地</p>
+<p>hadoop fs -copyToLocal 源文件所在(云端)  目的文件所在(本地)</p>
+</li>
+<li><p>-cp :从ＨＤＦＳ的一个路径拷贝到HDFS的另一个路径</p>
+<p>hadoop fs -cp 路径1 路径2</p>
+</li>
+<li><p>-mv: 在HDFS目录中移动文件</p>
+<p>hadoop fs -mv 路径1 路径2</p>
+</li>
+<li><p>-get:等同于copyToLocal, 就是从ＨＤＦＳ下载到本地</p>
+</li>
+<li><p>-put：等同于copyFromLocal，就是从本地拷贝到ＨＤＦＳ</p>
+</li>
+<li><p>-getmerge:合并下载，比如HDFS的目录 &#x2F;user&#x2F;tom&#x2F;下又多个文件log1、log2、log3等。使用这个命令将其合成一个文件</p>
+</li>
+<li><p>-tail:显示一个文件的末尾</p>
+<p>hadoop fs -tail &#x2F;user&#x2F;tom&#x2F;log1</p>
+</li>
+<li><p>-rm: 删除一个文件或文件夹</p>
+<p>hadoop fs -rm &#x2F;user&#x2F;tom</p>
+</li>
+<li><p>-rmdir:删除一个空目录(<strong>必须是空的</strong>)</p>
+<p>hadoop fs -rmdir &#x2F;user&#x2F;tom&#x2F;zz</p>
+</li>
+<li><p>-du ： 统计文件夹的大小信息</p>
+<p>hadoop fs -du -h &#x2F;user&#x2F;tom</p>
+</li>
+<li><p>-setrep: 设置HDFS中文件的副本数</p>
+<p>hadoop fs -setrep 10 &#x2F;user&#x2F;tom&#x2F;shi.txt</p>
+</li>
+</ul>
+<h1 id="HDFS客户端操作"><a href="#HDFS客户端操作" class="headerlink" title="HDFS客户端操作"></a>HDFS客户端操作</h1><h2 id="HDFS客户机准备"><a href="#HDFS客户机准备" class="headerlink" title="HDFS客户机准备"></a>HDFS客户机准备</h2><ul>
+<li><p>安装Hadoop的环境，配置环境变量</p>
+</li>
+<li><p>创建Maven工程</p>
+</li>
+<li><p>导入pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>2.8.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.hadoop<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hadoop-common<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>2.7.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.hadoop<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hadoop-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>2.7.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.hadoop<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hadoop-hdfs<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>2.7.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>jdk.tools<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jdk.tools<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$&#123;JAVA_HOME&#125;/lib/tools.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>在Eclipse&#x2F;IEDA如果打印不出日志，在控制台上显示</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.log4j:WARN No appenders could be found for logger (org.apache.hadoop.util.Shell).  </span><br><span class="line">2.log4j:WARN Please initialize the log4j system properly.  </span><br><span class="line">3.log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解决方案：在resource文件夹下，创建名为”log4j.properties”</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">log4j.rootLogger=INFO, stdout</span><br><span class="line">log4j.appender.stdout=org.apache.log4j.ConsoleAppender</span><br><span class="line">log4j.appender.stdout.layout=org.apache.log4j.PatternLayout</span><br><span class="line">log4j.appender.stdout.layout.ConversionPattern=%d %p [%c] - %m%n</span><br><span class="line">log4j.appender.logfile=org.apache.log4j.FileAppender</span><br><span class="line">log4j.appender.logfile.File=target/spring.log</span><br><span class="line">log4j.appender.logfile.layout=org.apache.log4j.PatternLayout</span><br><span class="line">log4j.appender.logfile.layout.ConversionPattern=%d %p [%c] - %m%n</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h2 id="HDFS的API操作"><a href="#HDFS的API操作" class="headerlink" title="HDFS的API操作"></a>HDFS的API操作</h2><h3 id="HDFS文件上传"><a href="#HDFS文件上传" class="headerlink" title="HDFS文件上传"></a>HDFS文件上传</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testCopyFromLocalFile</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">//1. 获取文件系统</span></span><br><span class="line">    Configuration conf= <span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs=FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 上传文件</span></span><br><span class="line">    fs.copyFromLocal(<span class="keyword">new</span> <span class="title class_">PATH</span>(<span class="string">&quot;e:/ban.txt&quot;</span>),<span class="keyword">new</span> <span class="title class_">PATH</span>(<span class="string">&quot;/user/tom/ban.txt&quot;</span>));</span><br><span class="line">    <span class="comment">//3. 释放资源</span></span><br><span class="line">    fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">HDFS的副本优先级问题：</span><br><span class="line">	参数优先级排序：（1）客户端代码中设置的值 &gt;（2）ClassPath下的用户自定义配置文件 &gt;（3）然后是服务器的默认配置</span><br><span class="line"></span><br><span class="line">	(1)客户端设置：</span><br><span class="line">		conf.set(&quot;dfs.repulication&quot;,&quot;2&quot;);</span><br><span class="line">	(2)ClassPath下的用户自定义配置文件</span><br><span class="line">		将hdfs-site.xml拷贝到项目的根目录下</span><br><span class="line">        <span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line">        <span class="meta">&lt;?xml-stylesheet type=<span class="string">&quot;text/xsl&quot;</span> href=<span class="string">&quot;configuration.xsl&quot;</span>?&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.replication<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">                 <span class="tag">&lt;<span class="name">value</span>&gt;</span>1<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"></span><br><span class="line">	(3)然后是服务器的默认配置，就是在Linux端里的hdfs-site.xml的设置</span><br></pre></td></tr></table></figure>
+
+<h3 id="HDFS文件下载"><a href="#HDFS文件下载" class="headerlink" title="HDFS文件下载"></a>HDFS文件下载</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">copyToLocal1</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 下载文件</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    copyToLocalFile: 参数说明</span></span><br><span class="line"><span class="comment">    	boolean delSrc 指是否将原文件删除</span></span><br><span class="line"><span class="comment">		Path src 指要下载的文件路径</span></span><br><span class="line"><span class="comment">		Path dst 指将文件下载到的路径</span></span><br><span class="line"><span class="comment">		boolean useRawLocalFileSystem 是否开启文件校验。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    fs.copyToLocalFile(<span class="literal">false</span>,<span class="keyword">new</span> <span class="title class_">PATH</span>(<span class="string">&quot;/user/tom/ban.txt&quot;</span>),<span class="keyword">new</span> <span class="title class_">PATH</span>(<span class="string">&quot;e:/ban.txt&quot;</span>),<span class="literal">true</span>);</span><br><span class="line">    <span class="comment">//3. 关闭资源</span></span><br><span class="line">    fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="HDFS文件夹删除"><a href="#HDFS文件夹删除" class="headerlink" title="HDFS文件夹删除"></a>HDFS文件夹删除</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">rmDir</span><span class="params">()</span>&#123;	</span><br><span class="line">	<span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 文件夹删除</span></span><br><span class="line">    fs.delete(<span class="keyword">new</span> <span class="title class_">PATH</span>(<span class="string">&#x27;/user/tom&#x27;</span>),<span class="literal">true</span>);</span><br><span class="line">    <span class="comment">//3. 关闭资源</span></span><br><span class="line">    fs.close;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="HDFS文件名更改"><a href="#HDFS文件名更改" class="headerlink" title="HDFS文件名更改"></a>HDFS文件名更改</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">renameDir</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 更改文件名</span></span><br><span class="line">    fs.rename(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/banzhang.txt&quot;</span>),<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/zzzz.txt&quot;</span>);</span><br><span class="line">    <span class="comment">//3. 关闭资源</span></span><br><span class="line">	fs.close();          </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="HDFS文件详情查看"><a href="#HDFS文件详情查看" class="headerlink" title="HDFS文件详情查看"></a>HDFS文件详情查看</h3><p><strong>查看文件名称、权限、长度、块信息</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">viewDetialDir</span><span class="params">()</span>&#123;</span><br><span class="line">      <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 查看文件名称、权限、长度、块信息</span></span><br><span class="line">    <span class="comment">//2.1 获取文件详情</span></span><br><span class="line">    RemoteIterator&lt;LocatedFileStatus&gt; listFiles =fs.listFiles(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/&quot;</span>),<span class="literal">true</span>);</span><br><span class="line">    <span class="comment">//2.2 输出详情</span></span><br><span class="line">    <span class="keyword">while</span>(listFiles.hasNext())&#123;</span><br><span class="line">        <span class="type">LocatedFileStatus</span> <span class="variable">status</span> <span class="operator">=</span> listFiles.next();</span><br><span class="line">        <span class="comment">// 文件名称</span></span><br><span class="line">        System.out.println(status.getPath().getName());</span><br><span class="line">        <span class="comment">// 长度</span></span><br><span class="line">        System.out.println(status.getlen());</span><br><span class="line">        <span class="comment">// 权限</span></span><br><span class="line">        System.out.println(status.getPermission());</span><br><span class="line">        <span class="comment">// 分组</span></span><br><span class="line">         System.out.println(status.getGroup());</span><br><span class="line">        <span class="comment">// 获取存储的块信息</span></span><br><span class="line">        BlockLocation[] blockLocations = status.getBlockLocations();</span><br><span class="line">		<span class="keyword">for</span> (BlockLocation blockLocation : blockLocations) &#123;</span><br><span class="line">			<span class="comment">// 获取块存储的主机节点</span></span><br><span class="line">			String[] hosts = blockLocation.getHosts();</span><br><span class="line">			<span class="keyword">for</span> (String host : hosts) &#123;</span><br><span class="line">				System.out.println(host);</span><br><span class="line">			&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//3. 关闭资源 </span></span><br><span class="line">    fs.close();</span><br><span class="line">&#125;</span><br><span class="line">    	</span><br></pre></td></tr></table></figure>
+
+<h3 id="HDFS文件和文件夹判断"><a href="#HDFS文件和文件夹判断" class="headerlink" title="HDFS文件和文件夹判断"></a>HDFS文件和文件夹判断</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">dirOrFile</span><span class="params">()</span>&#123;</span><br><span class="line">     <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 判断是文件还是文件夹</span></span><br><span class="line">    fileStatus[] listStatus = fs.listStatus(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/&quot;</span>));</span><br><span class="line">    <span class="keyword">for</span>(FileStatus fileStatus : listStatus)&#123;</span><br><span class="line">        <span class="comment">// 如果是文件</span></span><br><span class="line">		<span class="keyword">if</span> (fileStatus.isFile()) &#123;</span><br><span class="line">				System.out.println(<span class="string">&quot;f:&quot;</span>+fileStatus.getPath().getName());</span><br><span class="line">			&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">				System.out.println(<span class="string">&quot;d:&quot;</span>+fileStatus.getPath().getName());</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">//3. 关闭资源</span></span><br><span class="line">	fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="HDFS的I-x2F-O操作"><a href="#HDFS的I-x2F-O操作" class="headerlink" title="HDFS的I&#x2F;O操作"></a>HDFS的I&#x2F;O操作</h2><p>​	上面我们学的API操作HDFS系统都是框架封装好的。那么如果我们想自己实现上述API的操作该怎么实现呢？</p>
+<p>我们可以采用IO流的方式实现数据的上传和下载</p>
+<h3 id="HDFS文件上传-1"><a href="#HDFS文件上传-1" class="headerlink" title="HDFS文件上传"></a>HDFS文件上传</h3><p><strong>需求：把本地e盘上的banzhu.txt 文件上传到HDFS根目录</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">customFileUpload</span><span class="params">()</span>&#123;</span><br><span class="line">     <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 创建输入流</span></span><br><span class="line">    <span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInPutStream</span>(<span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e:/banzhu.txt&quot;</span>));</span><br><span class="line">    <span class="comment">//3. 创建输出流</span></span><br><span class="line">    <span class="type">FSDataOutPutStream</span> <span class="variable">fos</span> <span class="operator">=</span> fs.create(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/user/tom/banzhu.txt&quot;</span>));</span><br><span class="line">    <span class="comment">//4. 流对拷</span></span><br><span class="line">    IOUtils.copyBytes(fis,fos,conf);</span><br><span class="line">    <span class="comment">//5. 释放资源</span></span><br><span class="line">    IOUtils.close(fos);</span><br><span class="line">    IOUtils.close(fis);</span><br><span class="line">    fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="HDFS文件下载-1"><a href="#HDFS文件下载-1" class="headerlink" title="HDFS文件下载"></a>HDFS文件下载</h3><p><strong>需求：从HDFS上下载banhua.txt文件到本地e盘上</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">customFileDownLoad</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 创建输入流</span></span><br><span class="line">    <span class="type">FSDataInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> fs.open(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/banzhu.txt&quot;</span>));</span><br><span class="line">    <span class="comment">//3. 创建输出流</span></span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e:/banzhu.txt&quot;</span>));</span><br><span class="line">    <span class="comment">//4. 流对拷</span></span><br><span class="line">    IOUtiles.copyBytes(fis,fos,conf);</span><br><span class="line">    <span class="comment">//5. 释放资源</span></span><br><span class="line">    IOUtils.close(fos);</span><br><span class="line">    IOUtils.close(fis);</span><br><span class="line">    fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="定位文件读取"><a href="#定位文件读取" class="headerlink" title="定位文件读取"></a>定位文件读取</h3><p><strong>需求：分块读取HDFS上的大文件，比如根目录下的&#x2F;hadoop-2.7.2.tar.gz</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">************注意：因为hadoop-<span class="number">2.7</span><span class="number">.2</span>.tar.gz大小在<span class="number">188.</span>MB，而每块是128M,所以分为了两块********</span><br><span class="line">************现在下载的是第一块*******************************************************</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">clipFile</span><span class="params">()</span>&#123;</span><br><span class="line">     <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 获取输入流</span></span><br><span class="line">    <span class="type">FSDataInputStream</span> <span class="variable">fis</span> <span class="operator">=</span>fs.open(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/hadoop-2.7.2.tar.gz&quot;</span>));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//3. 获取输出流</span></span><br><span class="line">    <span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;e:/hadoop-2.7.2.tar.gz.part1&quot;</span>));</span><br><span class="line">    <span class="comment">//4. 流对拷</span></span><br><span class="line">    <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];<span class="comment">//1024字节</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">1024</span>*<span class="number">128</span>;i++)&#123; <span class="comment">//因为每块是128M = 1024(kb)*1024(mb)*128</span></span><br><span class="line">        fis.read(buf);</span><br><span class="line">        fos.write(buf);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//5. 释放资源</span></span><br><span class="line">    IOUtils.closeStream(fis);</span><br><span class="line">	IOUtils.closeStream(fos);</span><br><span class="line">	fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">************现在下载的是第二块*******************************************************</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">clipFile1</span><span class="params">()</span>&#123;</span><br><span class="line">     <span class="comment">//1. 创建文件系统</span></span><br><span class="line">    <span class="type">Configuration</span> <span class="variable">conf</span> <span class="operator">=</span><span class="keyword">new</span> <span class="title class_">Configuration</span>();</span><br><span class="line">    FileSystem fs= FileSystem.get(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;hdfs://node01:9000&quot;</span>),conf,<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">    <span class="comment">//2. 获取输入流</span></span><br><span class="line">    <span class="type">FSDataInputStream</span> <span class="variable">fis</span> <span class="operator">=</span>fs.open(<span class="keyword">new</span> <span class="title class_">Path</span>(<span class="string">&quot;/hadoop-2.7.2.tar.gz&quot;</span>));</span><br><span class="line">    <span class="comment">//3. 设置输入点</span></span><br><span class="line">    fis.seek(<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">128</span>); <span class="comment">//就是前面下载的块的大小，那里关闭</span></span><br><span class="line">    <span class="comment">//4. 创建输出流</span></span><br><span class="line">   FileOutputStream fos= <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;e:/hadoop-2.7.2.tar.gz.part2&quot;</span>));</span><br><span class="line">    <span class="comment">//6. 流对拷</span></span><br><span class="line">    IOUtils.copyBytes(fis,fos,conf);</span><br><span class="line">    <span class="comment">//6. 释放资源</span></span><br><span class="line">    IOUtils.closeStream(fis);</span><br><span class="line">	IOUtils.closeStream(fos);</span><br><span class="line">	fs.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="HDFS的数据流-面试重点"><a href="#HDFS的数据流-面试重点" class="headerlink" title="HDFS的数据流(面试重点)"></a>HDFS的数据流(面试重点)</h1><h2 id="HDFS写数据流程"><a href="#HDFS写数据流程" class="headerlink" title="HDFS写数据流程"></a>HDFS写数据流程</h2><p><img src="D:\大数据\media\HDFS写数据.PNG"></p>
+<p>步骤解读：</p>
+<ul>
+<li>客户端通过DistributedFileSystem模块想NameNode请求上传文件，NameNode检查目标文件是否存在，父目录是否存在</li>
+<li>若是不存在，则响应可以上传文件</li>
+<li>客户端请求上传第一个Block(0-128M)，请求返回DataNode</li>
+<li>NameNode根据节点距离和负载情况，返回DataNode节点信息，表示用这些节点存储数据</li>
+<li>客户端通过FSDataOutputStream开始请求DN1上传数据，DN1收到数据会继续调用DN2，然后DN2调用DN3，将这个通信管道建立完成</li>
+<li>DN1,DN2,DN3逐级应答客户端</li>
+<li>客户端开始往DN1上传第一个Block(先从磁盘读取数据放到一个本地内存缓存)，以Packet为单位，DN1收到一个Packet就会传给DN2,DN2传给DN3；<strong>DN1每传一个packet会放入一个应答队列等待应答</strong></li>
+<li>当一个Block传输完成之后，客户端再次请求NameNode上传第二个Block服务器。(重复执行3-7步骤)</li>
+</ul>
+<h2 id="网络拓扑：节点距离计算"><a href="#网络拓扑：节点距离计算" class="headerlink" title="网络拓扑：节点距离计算"></a>网络拓扑：节点距离计算</h2><p>在HDFS写数据的过程中，NameNode会选择距离待上传数据最近距离的DataNode接收数据。那么这个最近距离怎么计算呢？</p>
+<p>​	<strong>节点距离：两个节点到达最近的共同祖先的距离总和。</strong></p>
+<p><img src="D:\大数据\media\网络拓扑1.PNG"></p>
+<p>​	例如，假设有数据中心d1机架r1中的节点n1。该节点可以表示为&#x2F;d1&#x2F;r1&#x2F;n1。利用这种标记，这里给出四种距离描述，如图3-9所示。</p>
+<p><img src="D:\大数据\media\网络拓扑2.PNG"></p>
+<h3 id="副本节点选择"><a href="#副本节点选择" class="headerlink" title="副本节点选择"></a>副本节点选择</h3><p><img src="D:\大数据\media\网络拓扑3.PNG"></p>
+<h2 id="HDFS读数据流程"><a href="#HDFS读数据流程" class="headerlink" title="HDFS读数据流程"></a>HDFS读数据流程</h2><p><img src="D:\大数据\media\HDFS读数据.PNG" alt="HDFS读数据"></p>
+<p>步骤详情：</p>
+<ul>
+<li>客户端通过Distributed FileSystem向NameNode请求下载文件，NameNode通过查询元数据，找到文件所在的DataNode地址</li>
+<li>挑选一台DataNode(就近原则)服务器，然后读取数据</li>
+<li>DataNode开始传输数据给客户端（从磁盘里面读取数据输入流，以Packet为单位来做校验）。</li>
+<li>客户端以Packet为单位接受，先放在本地缓存，然后写入目标文件</li>
+</ul>
+<h1 id="NameNode和SecondaryNameNode"><a href="#NameNode和SecondaryNameNode" class="headerlink" title="NameNode和SecondaryNameNode"></a>NameNode和SecondaryNameNode</h1><h2 id="NN和2NN的工作机制"><a href="#NN和2NN的工作机制" class="headerlink" title="NN和2NN的工作机制"></a>NN和2NN的工作机制</h2><p>思考：NameNode中的元数据是存储在哪里的？</p>
+<p>​	首先，我们做个假设，如果存储在NameNode节点的磁盘中，因为经常需要进行随机访问，还有响应客户请求，必然是效率过低。因此，元数据需要存放在内存中。但如果只存在内存中，一旦断电，元数据丢失，整个集群就无法工作了。因此产生在磁盘中备份元数据的FsImage。</p>
+<p>​	这样又会带来新的问题，当在内存中的元数据更新时，如果同时更新FsImage，就会导致效率过低，但如果不更新，就会发生一致性问题，一旦NameNode节点断电，就会产生数据丢失。因此，引入Edits文件(只进行追加操作，效率很高)。每当元数据有更新或者添加元数据时，修改内存中的元数据并追加到Edits中。这样，一旦NameNode节点断电，可以通过FsImage和Edits的合并，合成元数据。</p>
+<p>​	但是，如果长时间添加数据到Edits中，会导致该文件数据过大，效率降低，而且一旦断电，恢复元数据需要的时间过长。因此，需要定期进行FsImage和Edits的合并，如果这个操作由NameNode节点完成，又会效率过低。因此，引入一个新的节点SecondaryNamenode，专门用于FsImage和Edits的合并。</p>
+<p>具体如图所示：</p>
+<p><img src="D:\大数据\media\NameNode工作机制.PNG" alt="NameNode工作机制"></p>
+<p><strong>第一阶段：</strong></p>
+<ol>
+<li>第一次启动NameNode格式化后，创建Fsimage和Edits文件。如果不是第一次启动，直接加载编辑日志和镜像文件到内存。</li>
+<li>客户端对元数据进行增删改查</li>
+<li>NameNode记录操作日志，更新滚动日志</li>
+<li>NameNode在内存中对数据进行增删改查</li>
+</ol>
+<p><strong>第二阶段</strong></p>
+<ol>
+<li><p>Secondary NameNode询问NameNode是否需要CheckPoint。直接带回NameNode是否检查结果</p>
+</li>
+<li><p>Secondary NameNode请求执行CheckPoint</p>
+</li>
+<li><p>NameNode滚动正在写的Edits日志</p>
+</li>
+<li><p>将滚动前编辑日志和镜像文件拷贝到Secondary NameNode</p>
+</li>
+<li><p>Secondary NameNode加载编辑日志和镜像文件到内存，并合并</p>
+</li>
+<li><p>生成新的镜像文件fsimagechekpoint</p>
+</li>
+<li><p>拷贝fsimage chekpoint 到 NameNode</p>
+</li>
+<li><p>NameNode将fsimage chkpoint 重新命名成fsimage</p>
+</li>
+</ol>
+<p><strong style="color:red;font-size:16px"><strong>NN和2NN工作机制详解</strong></strong></p>
+<p><strong>Fsimage：</strong>NameNode内存中元数据序列化后形成的文件。</p>
+<p><strong>Edits：</strong>记录客户端更新元数据信息的每一步操作（可通过Edits运算出元数据）。</p>
+<p>​	NameNode启动时，先滚动Edits并生成一个空的edits.inprogress，然后加载Edits和Fsimage到内存中，此时NameNode内存就持有最新的元数据信息。Client开始对NameNode发送元数据的增删改的请求，这些请求的操作首先会被记录到edits.inprogress中（查询元数据的操作不会被记录在Edits中，因为查询操作不会更改元数据信息），如果此时NameNode挂掉，重启后会从Edits中读取元数据的信息。然后，NameNode会在内存中执行元数据的增删改的操作。</p>
+<p>​	由于Edits中记录的操作会越来越多，Edits文件会越来越大，导致NameNode在启动加载Edits时会很慢，所以需要对Edits和Fsimage进行合并（所谓合并，就是将Edits和Fsimage加载到内存中，照着Edits中的操作一步步执行，最终形成新的Fsimage）。SecondaryNameNode的作用就是帮助NameNode进行Edits和Fsimage的合并工作。</p>
+<p>​	SecondaryNameNode首先会询问NameNode是否需要CheckPoint（触发CheckPoint需要满足两个条件中的任意一个，定时时间到和Edits中数据写满了）。直接带回NameNode是否检查结果。SecondaryNameNode执行CheckPoint操作，首先会让NameNode滚动Edits并生成一个空的edits.inprogress，滚动Edits的目的是给Edits打个标记，以后所有新的操作都写入edits.inprogress，其他未合并的Edits和Fsimage会拷贝到SecondaryNameNode的本地，然后将拷贝的Edits和Fsimage加载到内存中进行合并，生成fsimage.chkpoint，然后将fsimage.chkpoint拷贝给NameNode，重命名为Fsimage后替换掉原来的Fsimage。NameNode在启动时就只需要加载之前未合并的Edits和Fsimage即可，因为合并过的Edits中的元数据信息已经被记录在Fsimage中。</p>
+<h1 id="Fsimage和Edits解析"><a href="#Fsimage和Edits解析" class="headerlink" title="Fsimage和Edits解析"></a>Fsimage和Edits解析</h1><h2 id="Fsimage和Edits概念"><a href="#Fsimage和Edits概念" class="headerlink" title="Fsimage和Edits概念"></a>Fsimage和Edits概念</h2><p><img src="D:\大数据\media\Fsimage.PNG" alt="Fsimage"></p>
+<h2 id="查看文件"><a href="#查看文件" class="headerlink" title="查看文件"></a>查看文件</h2><h3 id="oiv查看Fsimage文件"><a href="#oiv查看Fsimage文件" class="headerlink" title="oiv查看Fsimage文件"></a>oiv查看Fsimage文件</h3><p>（1）查看oiv和oev命令</p>
+<p>​	[atguigu@hadoop102 current]$ hdfs</p>
+<p>​	<strong>oiv:</strong>    apply the offline fsimage viewer to an fsimage</p>
+<p>​	**oev: **  apply the offline edits viewer to an edits file</p>
+<p>（2）基本语法</p>
+<p>​		hdfs oiv -p 文件类型 -i镜像文件 -o 转换后文件输出路径</p>
+<p>（3）案例实操</p>
+<p>[atguigu@hadoop102 current]$ pwd</p>
+<p>​			&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;name&#x2F;current</p>
+<p>[atguigu@hadoop102 current]$ hdfs oiv -p XML -i fsimage_0000000000000000025 -o &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;fsimage.xml</p>
+<p>[atguigu@hadoop102 current]$ cat &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;fsimage.xml</p>
+<p>将显示的xml文件内容拷贝到Eclipse中创建的xml文件中，并格式化。部分显示结果如下。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">inode</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">id</span>&gt;</span>16386<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">type</span>&gt;</span>DIRECTORY<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">name</span>&gt;</span>user<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">mtime</span>&gt;</span>1512722284477<span class="tag">&lt;/<span class="name">mtime</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">permission</span>&gt;</span>atguigu:supergroup:rwxr-xr-x<span class="tag">&lt;/<span class="name">permission</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">nsquota</span>&gt;</span>-1<span class="tag">&lt;/<span class="name">nsquota</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">dsquota</span>&gt;</span>-1<span class="tag">&lt;/<span class="name">dsquota</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">inode</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">inode</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">id</span>&gt;</span>16387<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">type</span>&gt;</span>DIRECTORY<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">name</span>&gt;</span>atguigu<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">mtime</span>&gt;</span>1512790549080<span class="tag">&lt;/<span class="name">mtime</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">permission</span>&gt;</span>atguigu:supergroup:rwxr-xr-x<span class="tag">&lt;/<span class="name">permission</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">nsquota</span>&gt;</span>-1<span class="tag">&lt;/<span class="name">nsquota</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">dsquota</span>&gt;</span>-1<span class="tag">&lt;/<span class="name">dsquota</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">inode</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">inode</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">id</span>&gt;</span>16389<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">type</span>&gt;</span>FILE<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">name</span>&gt;</span>wc.input<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">replication</span>&gt;</span>3<span class="tag">&lt;/<span class="name">replication</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">mtime</span>&gt;</span>1512722322219<span class="tag">&lt;/<span class="name">mtime</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">atime</span>&gt;</span>1512722321610<span class="tag">&lt;/<span class="name">atime</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">perferredBlockSize</span>&gt;</span>134217728<span class="tag">&lt;/<span class="name">perferredBlockSize</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">permission</span>&gt;</span>atguigu:supergroup:rw-r--r--<span class="tag">&lt;/<span class="name">permission</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;<span class="name">blocks</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;<span class="name">block</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​			<span class="tag">&lt;<span class="name">id</span>&gt;</span>1073741825<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​			<span class="tag">&lt;<span class="name">genstamp</span>&gt;</span>1001<span class="tag">&lt;/<span class="name">genstamp</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​			<span class="tag">&lt;<span class="name">numBytes</span>&gt;</span>59<span class="tag">&lt;/<span class="name">numBytes</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​		<span class="tag">&lt;/<span class="name">block</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​	<span class="tag">&lt;/<span class="name">blocks</span>&gt;</span></span><br><span class="line"></span><br><span class="line">&lt;/inode &gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>思考：可以看出，Fsimage中没有记录块所对应DataNode，为什么？</p>
+<p>在集群启动后，要求DataNode上报数据块信息，并间隔一段时间后再次上报。</p>
+<h3 id="oev查看Edits文件"><a href="#oev查看Edits文件" class="headerlink" title="oev查看Edits文件"></a>oev查看Edits文件</h3><p>（1）基本语法</p>
+<p>​	hdfs oev -p 文件类型 -i编辑日志 -o 转换后文件输出路径</p>
+<p>（2）案例实操</p>
+<p>​		[atguigu@hadoop102 current]$ hdfs oev -p XML -i edits_0000000000000000012-		0000000000000000013 -o &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;edits.xml</p>
+<p>​	[atguigu@hadoop102 current]$ cat &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;edits.xml</p>
+<p>将显示的xml文件内容拷贝到Eclipse中创建的xml文件中，并格式化。显示结果如下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;EDITS&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;EDITS_VERSION&gt;-63&lt;/EDITS_VERSION&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;RECORD&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;OPCODE&gt;OP_START_LOG_SEGMENT&lt;/OPCODE&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;DATA&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;TXID&gt;129&lt;/TXID&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;/DATA&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;/RECORD&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;RECORD&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;OPCODE&gt;OP_ADD&lt;/OPCODE&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;DATA&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;TXID&gt;130&lt;/TXID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;LENGTH&gt;0&lt;/LENGTH&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;INODEID&gt;16407&lt;/INODEID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;PATH&gt;/hello7.txt&lt;/PATH&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;REPLICATION&gt;2&lt;/REPLICATION&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;MTIME&gt;1512943607866&lt;/MTIME&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;ATIME&gt;1512943607866&lt;/ATIME&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;BLOCKSIZE&gt;134217728&lt;/BLOCKSIZE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;CLIENT_NAME&gt;DFSClient_NONMAPREDUCE_-1544295051_1&lt;/CLIENT_NAME&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;CLIENT_MACHINE&gt;192.168.1.5&lt;/CLIENT_MACHINE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;OVERWRITE&gt;true&lt;/OVERWRITE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;PERMISSION_STATUS&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;USERNAME&gt;atguigu&lt;/USERNAME&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;GROUPNAME&gt;supergroup&lt;/GROUPNAME&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;MODE&gt;420&lt;/MODE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;/PERMISSION_STATUS&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;RPC_CLIENTID&gt;908eafd4-9aec-4288-96f1-e8011d181561&lt;/RPC_CLIENTID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;RPC_CALLID&gt;0&lt;/RPC_CALLID&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;/DATA&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;/RECORD&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;RECORD&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;OPCODE&gt;OP_ALLOCATE_BLOCK_ID&lt;/OPCODE&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;DATA&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;TXID&gt;131&lt;/TXID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;BLOCK_ID&gt;1073741839&lt;/BLOCK_ID&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;/DATA&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;/RECORD&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;RECORD&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;OPCODE&gt;OP_SET_GENSTAMP_V2&lt;/OPCODE&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;DATA&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;TXID&gt;132&lt;/TXID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;GENSTAMPV2&gt;1016&lt;/GENSTAMPV2&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;/DATA&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;/RECORD&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;RECORD&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;OPCODE&gt;OP_ADD_BLOCK&lt;/OPCODE&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;DATA&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;TXID&gt;133&lt;/TXID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;PATH&gt;/hello7.txt&lt;/PATH&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;BLOCK&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;BLOCK_ID&gt;1073741839&lt;/BLOCK_ID&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;NUM_BYTES&gt;0&lt;/NUM_BYTES&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;GENSTAMP&gt;1016&lt;/GENSTAMP&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;/BLOCK&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;RPC_CLIENTID&gt;&lt;/RPC_CLIENTID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;RPC_CALLID&gt;-2&lt;/RPC_CALLID&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;/DATA&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;/RECORD&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;RECORD&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;OPCODE&gt;OP_CLOSE&lt;/OPCODE&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;DATA&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;TXID&gt;134&lt;/TXID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;LENGTH&gt;0&lt;/LENGTH&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;INODEID&gt;0&lt;/INODEID&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;PATH&gt;/hello7.txt&lt;/PATH&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;REPLICATION&gt;2&lt;/REPLICATION&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;MTIME&gt;1512943608761&lt;/MTIME&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;ATIME&gt;1512943607866&lt;/ATIME&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;BLOCKSIZE&gt;134217728&lt;/BLOCKSIZE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;CLIENT_NAME&gt;&lt;/CLIENT_NAME&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;CLIENT_MACHINE&gt;&lt;/CLIENT_MACHINE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;OVERWRITE&gt;false&lt;/OVERWRITE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;BLOCK&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;BLOCK_ID&gt;1073741839&lt;/BLOCK_ID&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;NUM_BYTES&gt;25&lt;/NUM_BYTES&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;GENSTAMP&gt;1016&lt;/GENSTAMP&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;/BLOCK&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;PERMISSION_STATUS&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;USERNAME&gt;atguigu&lt;/USERNAME&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;GROUPNAME&gt;supergroup&lt;/GROUPNAME&gt;</span><br><span class="line"></span><br><span class="line">​				&lt;MODE&gt;420&lt;/MODE&gt;</span><br><span class="line"></span><br><span class="line">​			&lt;/PERMISSION_STATUS&gt;</span><br><span class="line"></span><br><span class="line">​		&lt;/DATA&gt;</span><br><span class="line"></span><br><span class="line">​	&lt;/RECORD&gt;</span><br><span class="line"></span><br><span class="line">&lt;/EDITS &gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>思考：NameNode如何确定下次开机启动的时候合并哪些Edits？</strong></p>
+<p>​	根据seen_txid来判断启动哪儿个EDITS</p>
+<h2 id="CheckPoint时间点设置"><a href="#CheckPoint时间点设置" class="headerlink" title="CheckPoint时间点设置"></a>CheckPoint时间点设置</h2><p>（1）通常情况下，SecondaryNameNode每隔一小时执行一次。</p>
+<p>​	[hdfs-default.xml]</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.checkpoint.period<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">value</span>&gt;</span>3600<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>（2）一分钟检查一次操作次数，3当操作次数达到1百万时，SecondaryNameNode执行一次。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.checkpoint.txns<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">value</span>&gt;</span>1000000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">description</span>&gt;</span>操作动作次数<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.checkpoint.check.period<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">value</span>&gt;</span>60<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">description</span>&gt;</span> 1分钟检查一次操作次数<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"></span><br><span class="line">&lt;/property &gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="NameNode故障处理-重点"><a href="#NameNode故障处理-重点" class="headerlink" title="NameNode故障处理(重点)"></a>NameNode故障处理(重点)</h1><p>NameNode故障后，可以采用如下两种方法恢复数据。</p>
+<h3 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h3><p><strong>将SecondaryNameNode中数据拷贝到NameNode存储数据中</strong></p>
+<ol>
+<li><p>kill -9 NameNode进程</p>
+</li>
+<li><p>删除NameNode存储的数据（&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;name）</p>
+</li>
+</ol>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ rm -rf &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;name&#x2F;*</p>
+<ol start="3">
+<li>拷贝SecondaryNameNode中数据到原NameNode存储数据目录</li>
+</ol>
+<p>[atguigu@hadoop102 dfs]$ scp -r atguigu@hadoop104:&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;namesecondary&#x2F;* .&#x2F;name&#x2F;</p>
+<ol start="4">
+<li>重新启动NameNode</li>
+</ol>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ sbin&#x2F;hadoop-daemon.sh start namenode</p>
+<h3 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h3><p><strong>使用-importCheckpoint选项启动NameNode守护进程，从而将SecondaryNameNode中的数据拷贝到NameNode中</strong></p>
+<ol>
+<li>修改hdfs-site.xml中的</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.checkpoint.period<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">value</span>&gt;</span>120<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.name.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"> <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/module/hadoop-2.7.2/data/tmp/dfs/name<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li><p>kill -9 NameNode进程</p>
+</li>
+<li><p>删除NameNode存储的数据（&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;name）</p>
+</li>
+</ol>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ rm -rf &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;name&#x2F;*</p>
+<ol start="4">
+<li>如果SecondaryNameNode不和NameNode在一个主机节点上，需要将SecondaryNameNode存储数据的目录拷贝到NameNode存储数据的平级目录，并删除in_use.lock文件</li>
+</ol>
+<p>[atguigu@hadoop102 dfs]$ scp -r atguigu@hadoop104:&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs&#x2F;namesecondary .&#x2F;</p>
+<p>[atguigu@hadoop102 namesecondary]$ rm -rf in_use.lock</p>
+<p>[atguigu@hadoop102 dfs]$ pwd</p>
+<p>&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data&#x2F;tmp&#x2F;dfs</p>
+<p>[atguigu@hadoop102 dfs]$ ls</p>
+<p>data  name  namesecondary</p>
+<ol start="5">
+<li>导入检查点数据（等待一会ctrl+c结束掉）</li>
+</ol>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ bin&#x2F;hdfs namenode -importCheckpoint</p>
+<ol start="6">
+<li>启动NameNode</li>
+</ol>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ sbin&#x2F;hadoop-daemon.sh start namenode</p>
+<h1 id="集群安全模式"><a href="#集群安全模式" class="headerlink" title="集群安全模式"></a>集群安全模式</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p><img src="D:\大数据\media\集群安全.PNG" alt="集群安全"></p>
+<h2 id="语法和案例"><a href="#语法和案例" class="headerlink" title="语法和案例"></a>语法和案例</h2><h3 id="基本语法：-1"><a href="#基本语法：-1" class="headerlink" title="基本语法："></a>基本语法：</h3><p>集群处于安全模式，不能执行重要操作（写操作）。集群启动完成后，自动退出安全模式。</p>
+<p>（1）bin&#x2F;hdfs dfsadmin -safemode get		（功能描述：查看安全模式状态）</p>
+<p>（2）bin&#x2F;hdfs dfsadmin -safemode enter  （功能描述：进入安全模式状态）</p>
+<p>（3）bin&#x2F;hdfs dfsadmin -safemode leave	（功能描述：离开安全模式状态）</p>
+<p>（4）bin&#x2F;hdfs dfsadmin -safemode wait	（功能描述：等待安全模式状态）</p>
+<p><strong style="color:red;font-size:18px">注意：等待安全模式，是正处在安全模式，安全模式一旦推出就执行xx程序的状态</strong></p>
+<h3 id="案例："><a href="#案例：" class="headerlink" title="案例："></a>案例：</h3><p>​	模拟等待安全模式</p>
+<p>（1）查看当前模式</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ hdfs dfsadmin -safemode get</p>
+<p>Safe mode is OFF</p>
+<p>（2）先进入安全模式</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ bin&#x2F;hdfs dfsadmin -safemode enter</p>
+<p>​	（3）创建并执行下面的脚本</p>
+<p>在&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2路径上，编辑一个脚本safemode.sh</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ touch safemode.sh</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ vim safemode.sh</p>
+<p>#!&#x2F;bin&#x2F;bash</p>
+<p>hdfs dfsadmin -safemode wait</p>
+<p>hdfs dfs -put &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;README.txt  &#x2F;</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ chmod 777 safemode.sh</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ .&#x2F;safemode.sh </p>
+<p>​	（4）再打开一个窗口，执行</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ bin&#x2F;hdfs dfsadmin -safemode leave</p>
+<p>（5）观察</p>
+<p>（a）再观察上一个窗口</p>
+<p>Safe mode is OFF</p>
+<p>（b）HDFS集群上已经有上传的数据了</p>
+<h1 id="NameNode多目录配置"><a href="#NameNode多目录配置" class="headerlink" title="NameNode多目录配置"></a>NameNode多目录配置</h1><h2 id="意义："><a href="#意义：" class="headerlink" title="意义："></a>意义：</h2><p>NameNode的本地目录可以配置成多个，且每个目录存放内容相同，增加了可靠性</p>
+<p>其实，就是将NameNode多复制几份</p>
+<h2 id="具体配置"><a href="#具体配置" class="headerlink" title="具体配置"></a>具体配置</h2><p>（1）在hdfs-site.xml文件中增加如下内容</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.name.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>file:///$&#123;hadoop.tmp.dir&#125;/dfs/name1,file:///$&#123;hadoop.tmp.dir&#125;/dfs/name2<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>（2）停止集群，删除data和logs中所有数据。</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ rm -rf data&#x2F; logs&#x2F;</p>
+<p>[atguigu@hadoop103 hadoop-2.7.2]$ rm -rf data&#x2F; logs&#x2F;</p>
+<p>[atguigu@hadoop104 hadoop-2.7.2]$ rm -rf data&#x2F; logs&#x2F;</p>
+<p>（3）格式化集群并启动。</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ bin&#x2F;hdfs namenode –format</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ sbin&#x2F;start-dfs.sh</p>
+<p>（4）查看结果</p>
+<p>[atguigu@hadoop102 dfs]$ ll</p>
+<p>总用量 12</p>
+<p>drwx——. 3 atguigu atguigu 4096 12月 11 08:03 data</p>
+<p>drwxrwxr-x. 3 atguigu atguigu 4096 12月 11 08:03 name1</p>
+<p>drwxrwxr-x. 3 atguigu atguigu 4096 12月 11 08:03 name2</p>
+<h1 id="DataNode（面试开发重点"><a href="#DataNode（面试开发重点" class="headerlink" title="DataNode（面试开发重点)"></a>DataNode（面试开发重点)</h1><h2 id="DataNode工作机制"><a href="#DataNode工作机制" class="headerlink" title="DataNode工作机制"></a>DataNode工作机制<img src="D:\大数据\media\datanode工作原理.PNG" alt="datanode工作原理"></h2><ol>
+<li>一个数据块在DataNode上以文件形式存储在磁盘上，包括两个文件，一个是数据本身，一个是元数据包括数据块的长度，块数据的校验和，以及时间戳</li>
+<li>DataNode启动后向NameNode注册，通过后，周期性(1小时)的想NameNode上报所有块信息</li>
+<li>心跳是每3秒一次，心跳的返回结果带有NameNode给该DataNode的命令，如复制块数据到另一台机器上，或删除某个数据块。如果超过10分钟没有收到某个DataNode的心跳，认为该节点不可以。<strong>（应该是10分钟加3秒）</strong></li>
+<li>集群运行中可以安全加入和退出一些机器。</li>
+</ol>
+<h2 id="数据完整性"><a href="#数据完整性" class="headerlink" title="数据完整性"></a>数据完整性</h2><p>DataNode节点保证数据完整性的方法。</p>
+<p>1）当DataNode读取Block的时候，它会计算CheckSum。</p>
+<p>2）如果计算后的CheckSum，与Block创建时值不一样，说明Block已经损坏。</p>
+<p>3）Client读取其他DataNode上的Block。</p>
+<p>4）DataNode在其文件创建后周期验证CheckSum，如图3-16所示。</p>
+<p><img src="D:\大数据\media\数据完整下.PNG" alt="数据完整下"></p>
+<h2 id="掉线时限参数设置"><a href="#掉线时限参数设置" class="headerlink" title="掉线时限参数设置"></a>掉线时限参数设置</h2><p><img src="D:\大数据\media\掉参数.PNG" alt="数据完整下"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">注意：hdfs-site.xml 配置文件中：</span><br><span class="line">	heartbeat.recheck.interval的单位为毫秒</span><br><span class="line">	dfs.heartbeat.interval的单位为秒</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.namenode.heartbeat.recheck-interval<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>300000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.heartbeat.interval<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">value</span>&gt;</span>3<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="服役新数据节点"><a href="#服役新数据节点" class="headerlink" title="服役新数据节点"></a>服役新数据节点</h2><h3 id="需求："><a href="#需求：" class="headerlink" title="需求："></a>需求：</h3><p>​	随着公司业务的增长，数据量越来越大，原有的数据节点的容量已经不能满足存储数据的需求，需要在原有集群基础上动态添加新的数据节点</p>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><ol>
+<li><p>在准备一台主机</p>
+</li>
+<li><p>修改IP和主机名称</p>
+</li>
+<li><p><strong>删除原来HDFS文件系统存留的文件</strong>(<strong>&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;data和log</strong>)</p>
+</li>
+<li><p>source以下配置文件</p>
+<p>[atguigu@hadoop105 hadoop-2.7.2]$ source &#x2F;etc&#x2F;profile</p>
+</li>
+</ol>
+<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><p>   (1)直接启动DataNode，即可关联到集群</p>
+<p>[atguigu@hadoop105 hadoop-2.7.2]$ sbin&#x2F;hadoop-daemon.sh start datanode</p>
+<p>[atguigu@hadoop105 hadoop-2.7.2]$ sbin&#x2F;yarn-daemon.sh start nodemanager </p>
+<p>（2）在hadoop105上上传文件</p>
+<p>[atguigu@hadoop105 hadoop-2.7.2]$ hadoop fs -put &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;LICENSE.txt &#x2F;</p>
+<p>（3）如果数据不均衡，可以用命令实现集群的再平衡</p>
+<p>[atguigu@hadoop102 sbin]$ .&#x2F;start-balancer.sh</p>
+<p>starting balancer, logging to &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;logs&#x2F;hadoop-atguigu-balancer-hadoop102.out</p>
+<p>Time Stamp        Iteration#  Bytes Already Moved  Bytes Left To Move  Bytes Being Moved</p>
+<h2 id="退役旧数据节点"><a href="#退役旧数据节点" class="headerlink" title="退役旧数据节点"></a>退役旧数据节点</h2><h3 id="添加白名单"><a href="#添加白名单" class="headerlink" title="添加白名单"></a>添加白名单</h3><p>添加到白名单的主机节点，都允许访问NameNode，不在白名单的主机节点，都会被退出。</p>
+<p>配置白名单的具体步骤如下：</p>
+<p>（1）在NameNode的&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;etc&#x2F;hadoop目录下创建dfs.hosts文件</p>
+<p>[atguigu@hadoop102 hadoop]$ pwd</p>
+<p>&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;etc&#x2F;hadoop</p>
+<p>[atguigu@hadoop102 hadoop]$ touch dfs.hosts</p>
+<p>[atguigu@hadoop102 hadoop]$ vi dfs.hosts</p>
+<p>添加如下主机名称（不添加hadoop105）</p>
+<p>hadoop102</p>
+<p>hadoop103</p>
+<p>hadoop104</p>
+<p>(2）在NameNode的hdfs-site.xml配置文件中增加dfs.hosts属性</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.hosts<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/module/hadoop-2.7.2/etc/hadoop/dfs.hosts<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>（3）配置文件分发</p>
+<p>[atguigu@hadoop102 hadoop]$ xsync hdfs-site.xml</p>
+<p>​	（4）刷新NameNode</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ hdfs dfsadmin -refreshNodes</p>
+<p>Refresh nodes successful</p>
+<p>​	（5）更新ResourceManager节点</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ yarn rmadmin -refreshNodes</p>
+<p>17&#x2F;06&#x2F;24 14:17:11 INFO client.RMProxy: Connecting to ResourceManager at hadoop103&#x2F;192.168.1.103:8033</p>
+<p>​	（6）在web浏览器上查看</p>
+<p><strong>如果数据不均衡，可以用命令实现集群的再平衡</strong></p>
+<p><strong>[atguigu@hadoop102 sbin]$ .&#x2F;start-balancer.sh</strong></p>
+<p><strong>starting balancer, logging to &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;logs&#x2F;hadoop-atguigu-balancer-hadoop102.out</strong></p>
+<p><strong>Time Stamp        Iteration#  Bytes Already Moved  Bytes Left To Move  Bytes Being Moved</strong></p>
+<h3 id="黑名单退役"><a href="#黑名单退役" class="headerlink" title="黑名单退役"></a>黑名单退役</h3><p><strong>在黑名单上面的主机都会被强制退出</strong></p>
+<p>1.在NameNode的&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;etc&#x2F;hadoop目录下创建dfs.hosts.exclude文件</p>
+<p>[atguigu@hadoop102 hadoop]$ pwd</p>
+<p>&#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;etc&#x2F;hadoop</p>
+<p>[atguigu@hadoop102 hadoop]$ touch dfs.hosts.exclude</p>
+<p>[atguigu@hadoop102 hadoop]$ vi dfs.hosts.exclude</p>
+<p>添加如下主机名称（要退役的节点）</p>
+<p>hadoop105</p>
+<p>2．在NameNode的hdfs-site.xml配置文件中增加dfs.hosts.exclude属性</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.hosts.exclude<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">   <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/module/hadoop-2.7.2/etc/hadoop/dfs.hosts.exclude<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>3．刷新NameNode、刷新ResourceManager</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ hdfs dfsadmin -refreshNodes</p>
+<p>Refresh nodes successful</p>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ yarn rmadmin -refreshNodes</p>
+<p>17&#x2F;06&#x2F;24 14:55:56 INFO client.RMProxy: Connecting to ResourceManager at hadoop103&#x2F;192.168.1.103:8033</p>
+<ol start="4">
+<li><pre><code>    检查Web浏览器，退役节点的状态为decommission in progress（退役中），说明数据节点正在复制块到其他节点，如图3-17所示
+</code></pre>
+</li>
+</ol>
+<p><img src="file:///C:\Users\84350\AppData\Local\Temp\ksohtml6992\wps2.jpg" alt="img"> </p>
+<p>图3-17  退役中</p>
+<p>\5. 等待退役节点状态为decommissioned（所有块已经复制完成），停止该节点及节点资源管理器。注意：如果副本数是3，服役的节点小于等于3，是不能退役成功的，需要修改副本数后才能退役，如图3-18所示</p>
+<p><img src="file:///C:\Users\84350\AppData\Local\Temp\ksohtml6992\wps3.jpg" alt="img"> </p>
+<p>图3-18 已退役</p>
+<p>[atguigu@hadoop105 hadoop-2.7.2]$ sbin&#x2F;hadoop-daemon.sh stop datanode</p>
+<p>stopping datanode</p>
+<p>[atguigu@hadoop105 hadoop-2.7.2]$ sbin&#x2F;yarn-daemon.sh stop nodemanager</p>
+<p>stopping nodemanager</p>
+<ol start="6">
+<li><pre><code>如果数据不均衡，可以用命令实现集群的再平衡
+</code></pre>
+</li>
+</ol>
+<p>[atguigu@hadoop102 hadoop-2.7.2]$ sbin&#x2F;start-balancer.sh </p>
+<p>starting balancer, logging to &#x2F;opt&#x2F;module&#x2F;hadoop-2.7.2&#x2F;logs&#x2F;hadoop-atguigu-balancer-hadoop102.out</p>
+<p>Time Stamp        Iteration#  Bytes Already Moved  Bytes Left To Move  Bytes Being Moved</p>
+<p>​	<strong>注意：不允许白名单和黑名单中同时出现同一个主机名称。</strong></p>
+<h2 id="DataNode多目录配置"><a href="#DataNode多目录配置" class="headerlink" title="DataNode多目录配置"></a>DataNode多目录配置</h2><ol>
+<li><pre><code>DataNode也可以配置成多个目录，每个目录存储的数据不一样。即：数据不是副本
+</code></pre>
+</li>
+</ol>
+<p>2．具体配置如下</p>
+<p>​	hdfs-site.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">​    <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.datanode.data.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>file:///$&#123;hadoop.tmp.dir&#125;/dfs/data1,file:///$&#123;hadoop.tmp.dir&#125;/dfs/data2<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2022/05/29/hdfs/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2022/05/29/mapreduce/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            mapreduce
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2022/05/29/hadoop/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">hadoop</div>
+      </a>
+    
+  </nav>
+
+  
+   
+    
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021-2022
+        <i class="ri-heart-fill heart_icon"></i> WangQi
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/1.svg" alt="王先生的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+ 
+<script src="/js/clickLove.js"></script>
+ 
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
